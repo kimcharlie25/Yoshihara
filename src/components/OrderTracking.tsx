@@ -83,7 +83,10 @@ const OrderTracking: React.FC<OrderTrackingProps> = ({ onBack }) => {
   };
 
   const formatServiceType = (serviceType: string) => {
-    return serviceType.charAt(0).toUpperCase() + serviceType.slice(1).replace('-', ' ');
+    if (serviceType === 'over-the-counter') {
+      return 'Over the Counter';
+    }
+    return serviceType.charAt(0).toUpperCase() + serviceType.slice(1).replace(/-/g, ' ');
   };
 
   const handleSearch = async (e: React.FormEvent) => {
@@ -180,43 +183,44 @@ const OrderTracking: React.FC<OrderTrackingProps> = ({ onBack }) => {
   };
 
   return (
-    <div className="min-h-screen bg-cream-50">
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b border-red-200">
+      <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-4">
+          <div className="flex items-center justify-between h-16 sm:h-20">
+            <div className="flex items-center space-x-2 sm:space-x-4">
               <button
                 onClick={onBack}
-                className="flex items-center space-x-2 text-gray-600 hover:text-black transition-colors duration-200"
+                className="flex items-center space-x-2 text-gray-600 hover:text-primary-600 transition-colors duration-200 text-sm sm:text-base"
               >
-                <ArrowLeft className="h-5 w-5" />
-                <span>Back to Menu</span>
+                <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+                <span className="hidden sm:inline">Back to Menu</span>
+                <span className="sm:hidden">Back</span>
               </button>
-              <h1 className="text-2xl font-noto font-semibold text-black">Track Your Order</h1>
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-funnel font-semibold text-gray-900">Track Your Order</h1>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Search Section */}
-        <div className="bg-white rounded-xl shadow-sm p-6 mb-6 border border-gray-200">
+        <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-6 border border-gray-200">
           <div className="flex items-center gap-2 mb-4">
-            <Search className="h-5 w-5 text-red-600" />
-            <h2 className="text-lg font-semibold text-gray-900">Search Order</h2>
+            <Search className="h-4 w-4 sm:h-5 sm:w-5 text-primary-600" />
+            <h2 className="text-lg sm:text-xl md:text-2xl font-funnel font-semibold text-gray-900">Search Order</h2>
           </div>
 
           <form onSubmit={handleSearch} className="space-y-4">
             {/* Search Type Toggle */}
-            <div className="flex gap-2">
+            <div className="flex gap-2 sm:gap-3">
               <button
                 type="button"
                 onClick={() => setSearchType('orderId')}
-                className={`flex-1 px-4 py-2 rounded-lg border-2 transition-all ${
+                className={`flex-1 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border-2 transition-all text-sm sm:text-base font-medium ${
                   searchType === 'orderId'
-                    ? 'border-red-600 bg-red-50 text-red-700 font-medium'
-                    : 'border-gray-300 text-gray-700 hover:border-gray-400'
+                    ? 'border-primary-600 bg-primary-50 text-primary-700'
+                    : 'border-gray-300 text-gray-700 hover:border-primary-300 bg-white'
                 }`}
               >
                 Order ID
@@ -224,10 +228,10 @@ const OrderTracking: React.FC<OrderTrackingProps> = ({ onBack }) => {
               <button
                 type="button"
                 onClick={() => setSearchType('phone')}
-                className={`flex-1 px-4 py-2 rounded-lg border-2 transition-all ${
+                className={`flex-1 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border-2 transition-all text-sm sm:text-base font-medium ${
                   searchType === 'phone'
-                    ? 'border-red-600 bg-red-50 text-red-700 font-medium'
-                    : 'border-gray-300 text-gray-700 hover:border-gray-400'
+                    ? 'border-primary-600 bg-primary-50 text-primary-700'
+                    : 'border-gray-300 text-gray-700 hover:border-primary-300 bg-white'
                 }`}
               >
                 Phone Number
@@ -235,19 +239,19 @@ const OrderTracking: React.FC<OrderTrackingProps> = ({ onBack }) => {
             </div>
 
             {/* Search Input */}
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               <input
                 type={searchType === 'phone' ? 'tel' : 'text'}
                 value={searchValue}
                 onChange={(e) => setSearchValue(e.target.value)}
                 placeholder={searchType === 'orderId' ? 'Enter Order ID (e.g., ABC12345)' : 'Enter phone number'}
-                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                className="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm sm:text-base font-sans"
                 disabled={loading}
               />
               <button
                 type="submit"
                 disabled={loading}
-                className="px-8 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed font-medium whitespace-nowrap"
+                className="w-full sm:w-auto px-6 sm:px-8 py-2.5 sm:py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed font-medium text-sm sm:text-base font-sans"
               >
                 {loading ? 'Searching...' : 'Search'}
               </button>
@@ -256,136 +260,136 @@ const OrderTracking: React.FC<OrderTrackingProps> = ({ onBack }) => {
 
           {/* Error Message */}
           {error && (
-            <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
-              <p className="text-red-800 text-sm">{error}</p>
+            <div className="mt-4 p-3 sm:p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+              <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-600 mt-0.5 flex-shrink-0" />
+              <p className="text-red-800 text-xs sm:text-sm font-sans">{error}</p>
             </div>
           )}
         </div>
 
         {/* Order Details */}
         {order && (
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* Status Card */}
-            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold text-gray-900">Order Status</h2>
-                <div className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 ${getStatusColor(order.status)}`}>
+            <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 border border-gray-200">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-4">
+                <h2 className="text-lg sm:text-xl md:text-2xl font-funnel font-semibold text-gray-900">Order Status</h2>
+                <div className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg border-2 ${getStatusColor(order.status)}`}>
                   {getStatusIcon(order.status)}
-                  <span className="font-medium capitalize">{order.status}</span>
+                  <span className="font-medium capitalize text-sm sm:text-base font-sans">{order.status}</span>
                 </div>
               </div>
-              <p className="text-gray-600">{getStatusMessage(order.status)}</p>
+              <p className="text-gray-600 text-sm sm:text-base font-sans">{getStatusMessage(order.status)}</p>
             </div>
 
             {/* Order Information */}
-            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <FileText className="h-5 w-5 text-red-600" />
+            <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 border border-gray-200">
+              <h3 className="text-lg sm:text-xl md:text-2xl font-funnel font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-primary-600" />
                 Order Information
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex items-start gap-3">
-                  <div className="p-2 bg-red-50 rounded-lg">
-                    <Package className="h-5 w-5 text-red-600" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <div className="flex items-start gap-2 sm:gap-3">
+                  <div className="p-2 bg-primary-50 rounded-lg flex-shrink-0">
+                    <Package className="h-4 w-4 sm:h-5 sm:w-5 text-primary-600" />
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Order ID</p>
-                    <p className="font-semibold text-gray-900">#{order.id.slice(-8).toUpperCase()}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <div className="p-2 bg-red-50 rounded-lg">
-                    <Calendar className="h-5 w-5 text-red-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Order Date</p>
-                    <p className="font-semibold text-gray-900">{formatDateTime(order.created_at)}</p>
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-sm text-gray-500 font-sans">Order ID</p>
+                    <p className="font-semibold text-gray-900 text-sm sm:text-base font-sans break-all">#{order.id.slice(-8).toUpperCase()}</p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3">
-                  <div className="p-2 bg-red-50 rounded-lg">
-                    <User className="h-5 w-5 text-red-600" />
+                <div className="flex items-start gap-2 sm:gap-3">
+                  <div className="p-2 bg-primary-50 rounded-lg flex-shrink-0">
+                    <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-primary-600" />
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Customer Name</p>
-                    <p className="font-semibold text-gray-900">{order.customer_name}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <div className="p-2 bg-red-50 rounded-lg">
-                    <Phone className="h-5 w-5 text-red-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Contact Number</p>
-                    <p className="font-semibold text-gray-900">{order.contact_number}</p>
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-sm text-gray-500 font-sans">Order Date</p>
+                    <p className="font-semibold text-gray-900 text-sm sm:text-base font-sans">{formatDateTime(order.created_at)}</p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3">
-                  <div className="p-2 bg-red-50 rounded-lg">
-                    <MapPin className="h-5 w-5 text-red-600" />
+                <div className="flex items-start gap-2 sm:gap-3">
+                  <div className="p-2 bg-primary-50 rounded-lg flex-shrink-0">
+                    <User className="h-4 w-4 sm:h-5 sm:w-5 text-primary-600" />
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Service Type</p>
-                    <p className="font-semibold text-gray-900">{formatServiceType(order.service_type)}</p>
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-sm text-gray-500 font-sans">Customer Name</p>
+                    <p className="font-semibold text-gray-900 text-sm sm:text-base font-sans break-words">{order.customer_name}</p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3">
-                  <div className="p-2 bg-red-50 rounded-lg">
-                    <DollarSign className="h-5 w-5 text-red-600" />
+                <div className="flex items-start gap-2 sm:gap-3">
+                  <div className="p-2 bg-primary-50 rounded-lg flex-shrink-0">
+                    <Phone className="h-4 w-4 sm:h-5 sm:w-5 text-primary-600" />
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Total Amount</p>
-                    <p className="font-semibold text-gray-900 text-xl">₱{order.total.toFixed(2)}</p>
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-sm text-gray-500 font-sans">Contact Number</p>
+                    <p className="font-semibold text-gray-900 text-sm sm:text-base font-sans">{order.contact_number}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-2 sm:gap-3">
+                  <div className="p-2 bg-primary-50 rounded-lg flex-shrink-0">
+                    <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-primary-600" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-sm text-gray-500 font-sans">Service Type</p>
+                    <p className="font-semibold text-gray-900 text-sm sm:text-base font-sans">{formatServiceType(order.service_type)}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-2 sm:gap-3">
+                  <div className="p-2 bg-primary-50 rounded-lg flex-shrink-0">
+                    <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-primary-600" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-sm text-gray-500 font-sans">Total Amount</p>
+                    <p className="font-semibold text-gray-900 text-lg sm:text-xl font-funnel">₱{order.total.toFixed(2)}</p>
                   </div>
                 </div>
               </div>
 
               {order.address && (
                 <div className="mt-4 pt-4 border-t border-gray-200">
-                  <p className="text-sm text-gray-500 mb-1">Delivery Address</p>
-                  <p className="text-gray-900">{order.address}</p>
+                  <p className="text-xs sm:text-sm text-gray-500 mb-1 font-sans">Delivery Address</p>
+                  <p className="text-gray-900 text-sm sm:text-base font-sans break-words">{order.address}</p>
                 </div>
               )}
 
               {order.notes && (
                 <div className="mt-4 pt-4 border-t border-gray-200">
-                  <p className="text-sm text-gray-500 mb-1">Special Instructions</p>
-                  <p className="text-gray-900">{order.notes}</p>
+                  <p className="text-xs sm:text-sm text-gray-500 mb-1 font-sans">Special Instructions</p>
+                  <p className="text-gray-900 text-sm sm:text-base font-sans break-words">{order.notes}</p>
                 </div>
               )}
             </div>
 
             {/* Order Items */}
-            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <Package className="h-5 w-5 text-red-600" />
+            <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 border border-gray-200">
+              <h3 className="text-lg sm:text-xl md:text-2xl font-funnel font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <Package className="h-4 w-4 sm:h-5 sm:w-5 text-primary-600" />
                 Order Items
               </h3>
               <div className="space-y-3">
                 {order.order_items.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div className="flex-1">
-                      <p className="font-medium text-gray-900">{item.name}</p>
+                  <div key={item.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 bg-gray-50 rounded-lg gap-2 sm:gap-0">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-gray-900 text-sm sm:text-base font-sans">{item.name}</p>
                       {item.variation && (
-                        <p className="text-sm text-gray-600">Size: {item.variation.name}</p>
+                        <p className="text-xs sm:text-sm text-gray-600 font-sans mt-1">Size: {item.variation.name}</p>
                       )}
                       {item.add_ons && item.add_ons.length > 0 && (
-                        <p className="text-sm text-gray-600">
+                        <p className="text-xs sm:text-sm text-gray-600 font-sans mt-1 break-words">
                           Add-ons: {item.add_ons.map((addon: any) => 
                             addon.quantity > 1 ? `${addon.name} x${addon.quantity}` : addon.name
                           ).join(', ')}
                         </p>
                       )}
                     </div>
-                    <div className="text-right">
-                      <p className="text-gray-900">₱{item.unit_price.toFixed(2)} x {item.quantity}</p>
-                      <p className="font-semibold text-red-600">₱{item.subtotal.toFixed(2)}</p>
+                    <div className="text-left sm:text-right flex-shrink-0">
+                      <p className="text-gray-900 text-xs sm:text-sm font-sans">₱{item.unit_price.toFixed(2)} x {item.quantity}</p>
+                      <p className="font-semibold text-primary-600 text-sm sm:text-base font-funnel">₱{item.subtotal.toFixed(2)}</p>
                     </div>
                   </div>
                 ))}
@@ -396,7 +400,7 @@ const OrderTracking: React.FC<OrderTrackingProps> = ({ onBack }) => {
             <div className="text-center">
               <button
                 onClick={handleClearSearch}
-                className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                className="w-full sm:w-auto px-6 py-2.5 sm:py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium text-sm sm:text-base font-sans"
               >
                 Search Another Order
               </button>
