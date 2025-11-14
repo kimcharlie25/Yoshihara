@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useCart } from './hooks/useCart';
 import Header from './components/Header';
+import DesktopNav from './components/DesktopNav';
 import Menu from './components/Menu';
 import Cart from './components/Cart';
 import Checkout from './components/Checkout';
@@ -33,23 +34,27 @@ function MainApp() {
     : menuItems.filter(item => item.category === selectedCategory);
 
   return (
-    <div className="min-h-screen bg-cream-50 font-inter">
+    <div className="min-h-screen bg-white font-sans">
       <Header 
         cartItemsCount={cart.getTotalItems()}
         onCartClick={() => handleViewChange('cart')}
         onMenuClick={() => handleViewChange('menu')}
         onOrderTrackingClick={() => handleViewChange('orderTracking')}
-        onCategoryClick={handleCategoryClick}
-        selectedCategory={selectedCategory}
       />
       
       {currentView === 'menu' && (
-        <Menu 
+        <>
+          <DesktopNav 
+            selectedCategory={selectedCategory}
+            onCategoryClick={handleCategoryClick}
+          />
+          <Menu 
           menuItems={filteredMenuItems}
           addToCart={cart.addToCart}
           cartItems={cart.cartItems}
           updateQuantity={cart.updateQuantity}
-        />
+          />
+        </>
       )}
       
       {currentView === 'cart' && (

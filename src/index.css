@@ -2,45 +2,53 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ClickEats Custom Styles */
-.bg-cream-50 {
-  background-color: #fefce8;
+/* Funnel Sans Font */
+@font-face {
+  font-family: 'Funnel Sans';
+  src: url('/fonts/FunnelSans-Regular.woff2') format('woff2'),
+       url('/fonts/FunnelSans-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
-.bg-cream-100 {
-  background-color: #fef3c7;
+@font-face {
+  font-family: 'Funnel Sans';
+  src: url('/fonts/FunnelSans-Medium.woff2') format('woff2'),
+       url('/fonts/FunnelSans-Medium.woff') format('woff');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
 }
 
-.bg-cream-200 {
-  background-color: #fde68a;
+@font-face {
+  font-family: 'Funnel Sans';
+  src: url('/fonts/FunnelSans-SemiBold.woff2') format('woff2'),
+       url('/fonts/FunnelSans-SemiBold.woff') format('woff');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
 }
 
-.border-cream-200 {
-  border-color: #fde68a;
+@font-face {
+  font-family: 'Funnel Sans';
+  src: url('/fonts/FunnelSans-Bold.woff2') format('woff2'),
+       url('/fonts/FunnelSans-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
 }
 
-.border-cream-300 {
-  border-color: #fcd34d;
+/* Modern Cafe Custom Styles */
+body {
+  background-color: #ffffff;
+  color: #1f2937;
+  font-family: 'Inter', sans-serif;
 }
 
-.hover\:bg-cream-50:hover {
-  background-color: #fefce8;
-}
-
-.hover\:bg-cream-100:hover {
-  background-color: #fef3c7;
-}
-
-.hover\:bg-cream-200:hover {
-  background-color: #fde68a;
-}
-
-.hover\:border-cream-400:hover {
-  border-color: #fbbf24;
-}
-
-.focus\:ring-cream-500:focus {
-  --tw-ring-color: #f59e0b;
+/* Headings use Funnel Sans */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Funnel Sans', sans-serif;
 }
 
 /* Hide scrollbar for mobile nav */

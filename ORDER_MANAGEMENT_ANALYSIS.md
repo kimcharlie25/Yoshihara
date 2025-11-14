@@ -441,7 +441,7 @@ if (/rate limit/i.test(error) || /missing identifiers/i.test(error)) {
 
 **Generated Order Summary:**
 ```
-🛒 ClickEats ORDER
+🛒 Joe's Cafe & Resto ORDER
 
 👤 Customer: John Doe
 📞 Contact: 09123456789

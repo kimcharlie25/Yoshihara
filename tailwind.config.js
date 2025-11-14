@@ -4,6 +4,19 @@ export default {
   theme: {
     extend: {
       colors: {
+        primary: {
+          50: '#f7f5f3',
+          100: '#ede8e3',
+          200: '#d9d0c7',
+          300: '#c2b5a8',
+          400: '#a89685',
+          500: '#bf9675',
+          600: '#a88262',
+          700: '#8a6a50',
+          800: '#715644',
+          900: '#5d4738',
+          950: '#2f241c'
+        },
         red: {
           50: '#fef2f2',
           100: '#fee2e2',
@@ -30,8 +43,9 @@ export default {
         }
       },
       fontFamily: {
-        'inter': ['Inter', 'sans-serif'],
-        'noto': ['Noto Serif', 'serif']
+        'funnel': ['"Funnel Sans"', 'sans-serif'],
+        'sans': ['Inter', 'sans-serif'],
+        'inter': ['Inter', 'sans-serif']
       },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-in-out',
