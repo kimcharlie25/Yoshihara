@@ -267,12 +267,12 @@ const OrdersManager: React.FC<OrdersManagerProps> = ({ onBack }) => {
               @media print {
                 @page {
                   margin: 0;
-                  size: 80mm auto;
+                  size: 58mm auto;
                 }
                 body {
                   margin: 0;
                   padding: 10px;
-                  width: 80mm;
+                  width: 58mm;
                 }
                 .no-print {
                   display: none !important;
@@ -285,8 +285,8 @@ const OrdersManager: React.FC<OrdersManagerProps> = ({ onBack }) => {
               }
               body {
                 font-family: 'Courier New', monospace;
-                width: 80mm;
-                max-width: 80mm;
+                width: 58mm;
+                max-width: 58mm;
                 margin: 0 auto;
                 padding: 15px 10px;
                 color: #000;
@@ -575,12 +575,12 @@ const OrdersManager: React.FC<OrdersManagerProps> = ({ onBack }) => {
                 @media print {
                   @page {
                     margin: 0;
-                    size: 80mm auto;
+                    size: 58mm auto;
                   }
                   body {
                     margin: 0;
                     padding: 10px;
-                    width: 80mm;
+                    width: 58mm;
                   }
                   .no-print {
                     display: none !important;
@@ -593,8 +593,8 @@ const OrdersManager: React.FC<OrdersManagerProps> = ({ onBack }) => {
                 }
                 body {
                   font-family: 'Courier New', monospace;
-                  width: 80mm;
-                  max-width: 80mm;
+                  width: 58mm;
+                  max-width: 58mm;
                   margin: 0 auto;
                   padding: 15px 10px;
                   color: #000;
@@ -869,12 +869,12 @@ const OrdersManager: React.FC<OrdersManagerProps> = ({ onBack }) => {
               @media print {
                 @page {
                   margin: 0;
-                  size: 80mm auto;
+                  size: 58mm auto;
                 }
                 body {
                   margin: 0;
                   padding: 10px;
-                  width: 80mm;
+                  width: 58mm;
                 }
                 .no-print {
                   display: none;
@@ -887,8 +887,8 @@ const OrdersManager: React.FC<OrdersManagerProps> = ({ onBack }) => {
               }
               body {
                 font-family: 'Courier New', monospace;
-                width: 80mm;
-                max-width: 80mm;
+                width: 58mm;
+                max-width: 58mm;
                 margin: 0 auto;
                 padding: 15px 10px;
                 color: #000;
