@@ -653,7 +653,7 @@ const OrdersManager: React.FC<OrdersManagerProps> = ({ onBack }) => {
       const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
       
       if (isMobile) {
-        // For Android tablets: Navigate directly to receipt page
+        // For Android tablets: Open receipt in new window/tab
         // Store current location to return after printing
         const currentUrl = window.location.href;
         try {
@@ -662,16 +662,40 @@ const OrdersManager: React.FC<OrdersManagerProps> = ({ onBack }) => {
           console.warn('Could not store return URL:', e);
         }
         
-        // Try to navigate to the receipt page
-        try {
-          window.location.href = dataUrl;
-        } catch (e) {
-          // If navigation fails, try opening in new window
-          console.error('Navigation failed, trying window.open:', e);
-          const printWindow = window.open(dataUrl, '_blank');
-          if (!printWindow) {
-            alert('Please allow popups to print the receipt, or try again.');
+        // Open receipt in new window (data URLs work with window.open)
+        const printWindow = window.open(dataUrl, '_blank');
+        if (!printWindow) {
+          // If popup blocked, try using blob URL instead
+          try {
+            const blob = new Blob([receiptHTML], { type: 'text/html' });
+            const blobUrl = URL.createObjectURL(blob);
+            const blobWindow = window.open(blobUrl, '_blank');
+            if (!blobWindow) {
+              alert('Please allow popups to print the receipt. You may need to enable popups in your browser settings.');
+            } else {
+              // Clean up blob URL after window closes
+              blobWindow.addEventListener('beforeunload', () => {
+                URL.revokeObjectURL(blobUrl);
+              });
+            }
+          } catch (e) {
+            console.error('Failed to open receipt:', e);
+            alert('Unable to open print window. Please check your browser popup settings.');
           }
+        } else {
+          // Wait for window to load, then trigger print
+          printWindow.addEventListener('load', () => {
+            setTimeout(() => {
+              printWindow.print();
+            }, 500);
+          });
+          
+          // Fallback: trigger print after delay
+          setTimeout(() => {
+            if (printWindow && !printWindow.closed) {
+              printWindow.print();
+            }
+          }, 1000);
         }
       } else {
         // Desktop: Open in new window with data URL
