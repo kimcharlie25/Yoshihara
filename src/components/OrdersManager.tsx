@@ -242,6 +242,8 @@ const OrdersManager: React.FC<OrdersManagerProps> = ({ onBack }) => {
       return;
     }
 
+    // Note: Modal is not closed here since print button is now outside the modal
+
     // Find the latest order data from the orders array to ensure we have the most current data
     const latestOrder = orders.find(o => o.id === order.id) || order;
     
@@ -330,9 +332,12 @@ const OrdersManager: React.FC<OrdersManagerProps> = ({ onBack }) => {
       // Hide parent page content during printing
       const originalBodyDisplay = document.body.style.display;
       const originalHtmlDisplay = document.documentElement.style.display;
+      const originalBodyVisibility = document.body.style.visibility;
+      const originalHtmlVisibility = document.documentElement.style.visibility;
       
       // Create a hidden iframe for mobile printing
       const iframe = document.createElement('iframe');
+      iframe.setAttribute('id', 'receipt-print-iframe');
       iframe.style.position = 'fixed';
       iframe.style.right = '0';
       iframe.style.bottom = '0';
@@ -341,6 +346,7 @@ const OrdersManager: React.FC<OrdersManagerProps> = ({ onBack }) => {
       iframe.style.border = '0';
       iframe.style.opacity = '0';
       iframe.style.pointerEvents = 'none';
+      iframe.style.zIndex = '999999';
       document.body.appendChild(iframe);
 
       const receiptHTML = `
@@ -646,19 +652,30 @@ const OrdersManager: React.FC<OrdersManagerProps> = ({ onBack }) => {
         
         // Wait for content to load, then trigger print
         setTimeout(() => {
-          if (iframe.contentWindow) {
+          if (iframe.contentWindow && iframe.contentDocument) {
+            // Hide parent page completely before printing
+            document.body.style.display = 'none';
+            document.documentElement.style.display = 'none';
+            document.body.style.visibility = 'hidden';
+            document.documentElement.style.visibility = 'hidden';
+            
             // Add print event listener to hide parent page
             const handleBeforePrint = () => {
               document.body.style.display = 'none';
               document.documentElement.style.display = 'none';
+              document.body.style.visibility = 'hidden';
+              document.documentElement.style.visibility = 'hidden';
             };
             
             const handleAfterPrint = () => {
               document.body.style.display = originalBodyDisplay;
               document.documentElement.style.display = originalHtmlDisplay;
+              document.body.style.visibility = originalBodyVisibility;
+              document.documentElement.style.visibility = originalHtmlVisibility;
               setTimeout(() => {
-                if (iframe.parentNode) {
-                  document.body.removeChild(iframe);
+                const iframeEl = document.getElementById('receipt-print-iframe');
+                if (iframeEl && iframeEl.parentNode) {
+                  iframeEl.parentNode.removeChild(iframeEl);
                 }
               }, 100);
             };
@@ -667,23 +684,27 @@ const OrdersManager: React.FC<OrdersManagerProps> = ({ onBack }) => {
             iframe.contentWindow.addEventListener('beforeprint', handleBeforePrint);
             iframe.contentWindow.addEventListener('afterprint', handleAfterPrint);
             
-            // Also hide parent page as fallback
-            document.body.style.display = 'none';
-            document.documentElement.style.display = 'none';
-            
+            // Focus and print from iframe
             iframe.contentWindow.focus();
-            iframe.contentWindow.print();
+            
+            // Small delay to ensure parent is hidden
+            setTimeout(() => {
+              iframe.contentWindow?.print();
+            }, 100);
             
             // Restore parent page after printing (fallback)
             setTimeout(() => {
               document.body.style.display = originalBodyDisplay;
               document.documentElement.style.display = originalHtmlDisplay;
-              if (iframe.parentNode) {
-                document.body.removeChild(iframe);
+              document.body.style.visibility = originalBodyVisibility;
+              document.documentElement.style.visibility = originalHtmlVisibility;
+              const iframeEl = document.getElementById('receipt-print-iframe');
+              if (iframeEl && iframeEl.parentNode) {
+                iframeEl.parentNode.removeChild(iframeEl);
               }
-            }, 2000);
+            }, 3000);
           }
-        }, 250);
+        }, 500);
       }
     } else {
       // Desktop: Use window.open approach
@@ -692,8 +713,11 @@ const OrdersManager: React.FC<OrdersManagerProps> = ({ onBack }) => {
         // Fallback to iframe if popup is blocked
         const originalBodyDisplay = document.body.style.display;
         const originalHtmlDisplay = document.documentElement.style.display;
+        const originalBodyVisibility = document.body.style.visibility;
+        const originalHtmlVisibility = document.documentElement.style.visibility;
         
         const iframe = document.createElement('iframe');
+        iframe.setAttribute('id', 'receipt-print-iframe-desktop');
         iframe.style.position = 'fixed';
         iframe.style.right = '0';
         iframe.style.bottom = '0';
@@ -702,6 +726,7 @@ const OrdersManager: React.FC<OrdersManagerProps> = ({ onBack }) => {
         iframe.style.border = '0';
         iframe.style.opacity = '0';
         iframe.style.pointerEvents = 'none';
+        iframe.style.zIndex = '999999';
         document.body.appendChild(iframe);
 
         const receiptHTML = `
@@ -998,19 +1023,30 @@ const OrdersManager: React.FC<OrdersManagerProps> = ({ onBack }) => {
           iframeDoc.close();
           
           setTimeout(() => {
-            if (iframe.contentWindow) {
+            if (iframe.contentWindow && iframe.contentDocument) {
+              // Hide parent page completely before printing
+              document.body.style.display = 'none';
+              document.documentElement.style.display = 'none';
+              document.body.style.visibility = 'hidden';
+              document.documentElement.style.visibility = 'hidden';
+              
               // Add print event listener to hide parent page
               const handleBeforePrint = () => {
                 document.body.style.display = 'none';
                 document.documentElement.style.display = 'none';
+                document.body.style.visibility = 'hidden';
+                document.documentElement.style.visibility = 'hidden';
               };
               
               const handleAfterPrint = () => {
                 document.body.style.display = originalBodyDisplay;
                 document.documentElement.style.display = originalHtmlDisplay;
+                document.body.style.visibility = originalBodyVisibility;
+                document.documentElement.style.visibility = originalHtmlVisibility;
                 setTimeout(() => {
-                  if (iframe.parentNode) {
-                    document.body.removeChild(iframe);
+                  const iframeEl = document.getElementById('receipt-print-iframe-desktop');
+                  if (iframeEl && iframeEl.parentNode) {
+                    iframeEl.parentNode.removeChild(iframeEl);
                   }
                 }, 100);
               };
@@ -1019,23 +1055,27 @@ const OrdersManager: React.FC<OrdersManagerProps> = ({ onBack }) => {
               iframe.contentWindow.addEventListener('beforeprint', handleBeforePrint);
               iframe.contentWindow.addEventListener('afterprint', handleAfterPrint);
               
-              // Also hide parent page as fallback
-              document.body.style.display = 'none';
-              document.documentElement.style.display = 'none';
-              
+              // Focus and print from iframe
               iframe.contentWindow.focus();
-              iframe.contentWindow.print();
+              
+              // Small delay to ensure parent is hidden
+              setTimeout(() => {
+                iframe.contentWindow?.print();
+              }, 100);
               
               // Restore parent page after printing (fallback)
               setTimeout(() => {
                 document.body.style.display = originalBodyDisplay;
                 document.documentElement.style.display = originalHtmlDisplay;
-                if (iframe.parentNode) {
-                  document.body.removeChild(iframe);
+                document.body.style.visibility = originalBodyVisibility;
+                document.documentElement.style.visibility = originalHtmlVisibility;
+                const iframeEl = document.getElementById('receipt-print-iframe-desktop');
+                if (iframeEl && iframeEl.parentNode) {
+                  iframeEl.parentNode.removeChild(iframeEl);
                 }
-              }, 2000);
+              }, 3000);
             }
-          }, 250);
+          }, 500);
         }
         return;
       }
@@ -1610,6 +1650,13 @@ const OrdersManager: React.FC<OrdersManagerProps> = ({ onBack }) => {
                             >
                               View
                             </button>
+                            <button
+                              onClick={() => handlePrintReceipt(order)}
+                              className="px-3 py-1.5 border border-primary-300 rounded-lg hover:bg-primary-50 text-primary-700 flex items-center gap-1"
+                              title="Print Receipt"
+                            >
+                              <Printer className="h-4 w-4" />
+                            </button>
                             <select
                               value={order.status}
                               onChange={(e) => handleStatusUpdate(order.id, e.target.value)}
@@ -1675,6 +1722,13 @@ const OrdersManager: React.FC<OrdersManagerProps> = ({ onBack }) => {
                       >
                         Details
                       </button>
+                      <button
+                        onClick={() => handlePrintReceipt(order)}
+                        className="px-3 py-2 border border-primary-300 rounded-lg hover:bg-primary-50 text-primary-700"
+                        title="Print Receipt"
+                      >
+                        <Printer className="h-4 w-4" />
+                      </button>
                       <select
                         value={order.status}
                         onChange={(e) => handleStatusUpdate(order.id, e.target.value)}
@@ -1721,13 +1775,6 @@ const OrdersManager: React.FC<OrdersManagerProps> = ({ onBack }) => {
                 <p className="text-sm text-gray-500 mt-1">Complete order details</p>
               </div>
               <div className="flex items-center gap-2">
-                <button
-                  onClick={() => handlePrintReceipt(selectedOrder)}
-                  className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors duration-200 text-sm font-medium"
-                >
-                  <Printer className="h-4 w-4" />
-                  Print Receipt
-                </button>
                 <button
                   onClick={() => handleDeleteOrder(selectedOrder.id, selectedOrder.id.slice(-8).toUpperCase())}
                   disabled={deleting === selectedOrder.id}
