@@ -236,298 +236,913 @@ const OrdersManager: React.FC<OrdersManagerProps> = ({ onBack }) => {
   };
 
   const handlePrintReceipt = (order: OrderWithItems) => {
-    // Create a printable receipt window
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
-
     const formatServiceTypeDisplay = (serviceType: string) => {
       return serviceType === 'over-the-counter' 
         ? 'Over the Counter' 
         : serviceType.charAt(0).toUpperCase() + serviceType.slice(1).replace(/-/g, ' ');
     };
 
-    const receiptHTML = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Receipt - Order #${order.id.slice(-8).toUpperCase()}</title>
-          <style>
-            @media print {
-              @page {
+    // Detect if we're on mobile
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    // For mobile, use iframe approach which is more reliable
+    if (isMobile) {
+      // Create a hidden iframe for mobile printing
+      const iframe = document.createElement('iframe');
+      iframe.style.position = 'fixed';
+      iframe.style.right = '0';
+      iframe.style.bottom = '0';
+      iframe.style.width = '0';
+      iframe.style.height = '0';
+      iframe.style.border = '0';
+      document.body.appendChild(iframe);
+
+      const receiptHTML = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Receipt - Order #${order.id.slice(-8).toUpperCase()}</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+              @media print {
+                @page {
+                  margin: 0;
+                  size: 80mm auto;
+                }
+                body {
+                  margin: 0;
+                  padding: 10px;
+                  width: 80mm;
+                }
+                .no-print {
+                  display: none !important;
+                }
+              }
+              * {
                 margin: 0;
-                size: 80mm auto;
+                padding: 0;
+                box-sizing: border-box;
               }
               body {
-                margin: 0;
-                padding: 10px;
+                font-family: 'Courier New', monospace;
                 width: 80mm;
+                max-width: 80mm;
+                margin: 0 auto;
+                padding: 15px 10px;
+                color: #000;
+                font-size: 12px;
+                line-height: 1.3;
+                background: white;
               }
-              .no-print {
-                display: none;
+              .header {
+                text-align: center;
+                margin-bottom: 15px;
+                padding-bottom: 10px;
+                border-bottom: 1px dashed #000;
               }
-            }
-            * {
-              margin: 0;
-              padding: 0;
-              box-sizing: border-box;
-            }
-            body {
-              font-family: 'Courier New', monospace;
-              width: 80mm;
-              max-width: 80mm;
-              margin: 0 auto;
-              padding: 15px 10px;
-              color: #000;
-              font-size: 12px;
-              line-height: 1.3;
-            }
-            .header {
-              text-align: center;
-              margin-bottom: 15px;
-              padding-bottom: 10px;
-              border-bottom: 1px dashed #000;
-            }
-            .header h1 {
-              margin: 0;
-              font-size: 16px;
-              font-weight: bold;
-              text-transform: uppercase;
-              letter-spacing: 1px;
-            }
-            .header p {
-              margin: 3px 0;
-              font-size: 10px;
-            }
-            .divider {
-              border-top: 1px dashed #000;
-              margin: 8px 0;
-            }
-            .info-section {
-              margin-bottom: 10px;
-              font-size: 11px;
-            }
-            .info-row {
-              display: flex;
-              justify-content: space-between;
-              margin: 3px 0;
-              font-size: 11px;
-            }
-            .info-label {
-              font-weight: bold;
-            }
-            .items-section {
-              margin: 10px 0;
-            }
-            .item-row {
-              margin: 5px 0;
-              font-size: 11px;
-            }
-            .item-name {
-              font-weight: bold;
-              margin-bottom: 2px;
-            }
-            .item-details {
-              font-size: 10px;
-              color: #333;
-              margin-left: 5px;
-              margin-bottom: 2px;
-            }
-            .item-line {
-              display: flex;
-              justify-content: space-between;
-              margin-top: 3px;
-            }
-            .item-qty-price {
-              display: flex;
-              justify-content: space-between;
-              width: 100%;
-            }
-            .total-section {
-              margin-top: 10px;
-              padding-top: 8px;
-              border-top: 2px dashed #000;
-            }
-            .total-row {
-              display: flex;
-              justify-content: space-between;
-              font-size: 14px;
-              font-weight: bold;
-              margin: 5px 0;
-            }
-            .footer {
-              text-align: center;
-              margin-top: 15px;
-              padding-top: 10px;
-              border-top: 1px dashed #000;
-              font-size: 10px;
-            }
-            .button-container {
-              text-align: center;
-              margin: 20px 0;
-            }
-            button {
-              background-color: #bf9675;
-              color: white;
-              border: none;
-              padding: 12px 24px;
-              font-size: 14px;
-              border-radius: 6px;
-              cursor: pointer;
-              font-weight: bold;
-            }
-            button:hover {
-              background-color: #a88262;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <h1>Joe's Cafe & Resto</h1>
-            <p>Order Receipt</p>
-          </div>
-
-          <div class="divider"></div>
-
-          <div class="info-section">
-            <div class="info-row">
-              <span class="info-label">Order #:</span>
-              <span>${order.id.slice(-8).toUpperCase()}</span>
-            </div>
-            <div class="info-row">
-              <span>Date:</span>
-              <span>${new Date(order.created_at).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}</span>
-            </div>
-            <div class="info-row">
-              <span>Time:</span>
-              <span>${new Date(order.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
-            </div>
-            <div class="info-row">
-              <span>Status:</span>
-              <span>${order.status.charAt(0).toUpperCase() + order.status.slice(1)}</span>
-            </div>
-          </div>
-
-          <div class="divider"></div>
-
-          <div class="info-section">
-            <div class="info-row">
-              <span class="info-label">Customer:</span>
-              <span>${order.customer_name}</span>
-            </div>
-            <div class="info-row">
-              <span>Contact:</span>
-              <span>${order.contact_number}</span>
-            </div>
-            <div class="info-row">
-              <span>Service:</span>
-              <span>${formatServiceTypeDisplay(order.service_type)}</span>
-            </div>
-            ${order.address ? `
-            <div class="info-row">
-              <span>Address:</span>
-              <span style="text-align: right; max-width: 60%;">${order.address}</span>
-            </div>
-            ` : ''}
-            ${order.pickup_time ? `
-            <div class="info-row">
-              <span>Pickup:</span>
-              <span>${order.pickup_time}</span>
-            </div>
-            ` : ''}
-            ${order.party_size ? `
-            <div class="info-row">
-              <span>Party:</span>
-              <span>${order.party_size} person${order.party_size !== 1 ? 's' : ''}</span>
-            </div>
-            ` : ''}
-            ${order.dine_in_time ? `
-            <div class="info-row">
-              <span>Dine-in:</span>
-              <span>${new Date(order.dine_in_time).toLocaleString('en-US', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
-            </div>
-            ` : ''}
-            <div class="info-row">
-              <span>Payment:</span>
-              <span>${order.payment_method}</span>
-            </div>
-          </div>
-
-          <div class="divider"></div>
-
-          <div class="items-section">
-            ${order.order_items.map(item => {
-              let itemName = item.name;
-              let itemDetails = '';
-              if (item.variation) {
-                itemDetails += `<div class="item-details">Size: ${item.variation.name}</div>`;
+              .header h1 {
+                margin: 0;
+                font-size: 16px;
+                font-weight: bold;
+                text-transform: uppercase;
+                letter-spacing: 1px;
               }
-              if (item.add_ons && item.add_ons.length > 0) {
-                const addOnsList = item.add_ons.map((addon: any) => 
-                  addon.quantity > 1 ? `${addon.name} x${addon.quantity}` : addon.name
-                ).join(', ');
-                itemDetails += `<div class="item-details">+ ${addOnsList}</div>`;
+              .header p {
+                margin: 3px 0;
+                font-size: 10px;
               }
-              return `
-                <div class="item-row">
-                  <div class="item-name">${itemName}</div>
-                  ${itemDetails}
-                  <div class="item-line">
-                    <div class="item-qty-price">
-                      <span>${item.quantity}x ₱${item.unit_price.toFixed(2)}</span>
-                      <span>₱${item.subtotal.toFixed(2)}</span>
+              .divider {
+                border-top: 1px dashed #000;
+                margin: 8px 0;
+              }
+              .info-section {
+                margin-bottom: 10px;
+                font-size: 11px;
+              }
+              .info-row {
+                display: flex;
+                justify-content: space-between;
+                margin: 3px 0;
+                font-size: 11px;
+              }
+              .info-label {
+                font-weight: bold;
+              }
+              .items-section {
+                margin: 10px 0;
+              }
+              .item-row {
+                margin: 5px 0;
+                font-size: 11px;
+              }
+              .item-name {
+                font-weight: bold;
+                margin-bottom: 2px;
+              }
+              .item-details {
+                font-size: 10px;
+                color: #333;
+                margin-left: 5px;
+                margin-bottom: 2px;
+              }
+              .item-line {
+                display: flex;
+                justify-content: space-between;
+                margin-top: 3px;
+              }
+              .item-qty-price {
+                display: flex;
+                justify-content: space-between;
+                width: 100%;
+              }
+              .total-section {
+                margin-top: 10px;
+                padding-top: 8px;
+                border-top: 2px dashed #000;
+              }
+              .total-row {
+                display: flex;
+                justify-content: space-between;
+                font-size: 14px;
+                font-weight: bold;
+                margin: 5px 0;
+              }
+              .footer {
+                text-align: center;
+                margin-top: 15px;
+                padding-top: 10px;
+                border-top: 1px dashed #000;
+                font-size: 10px;
+              }
+              .button-container {
+                text-align: center;
+                margin: 20px 0;
+              }
+              button {
+                background-color: #bf9675;
+                color: white;
+                border: none;
+                padding: 12px 24px;
+                font-size: 14px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-weight: bold;
+              }
+              button:hover {
+                background-color: #a88262;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <h1>Joe's Cafe & Resto</h1>
+              <p>Order Receipt</p>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="info-section">
+              <div class="info-row">
+                <span class="info-label">Order #:</span>
+                <span>${order.id.slice(-8).toUpperCase()}</span>
+              </div>
+              <div class="info-row">
+                <span>Date:</span>
+                <span>${new Date(order.created_at).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}</span>
+              </div>
+              <div class="info-row">
+                <span>Time:</span>
+                <span>${new Date(order.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
+              </div>
+              <div class="info-row">
+                <span>Status:</span>
+                <span>${order.status.charAt(0).toUpperCase() + order.status.slice(1)}</span>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="info-section">
+              <div class="info-row">
+                <span class="info-label">Customer:</span>
+                <span>${order.customer_name}</span>
+              </div>
+              <div class="info-row">
+                <span>Contact:</span>
+                <span>${order.contact_number}</span>
+              </div>
+              <div class="info-row">
+                <span>Service:</span>
+                <span>${formatServiceTypeDisplay(order.service_type)}</span>
+              </div>
+              ${order.address ? `
+              <div class="info-row">
+                <span>Address:</span>
+                <span style="text-align: right; max-width: 60%;">${order.address}</span>
+              </div>
+              ` : ''}
+              ${order.pickup_time ? `
+              <div class="info-row">
+                <span>Pickup:</span>
+                <span>${order.pickup_time}</span>
+              </div>
+              ` : ''}
+              ${order.party_size ? `
+              <div class="info-row">
+                <span>Party:</span>
+                <span>${order.party_size} person${order.party_size !== 1 ? 's' : ''}</span>
+              </div>
+              ` : ''}
+              ${order.dine_in_time ? `
+              <div class="info-row">
+                <span>Dine-in:</span>
+                <span>${new Date(order.dine_in_time).toLocaleString('en-US', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
+              </div>
+              ` : ''}
+              <div class="info-row">
+                <span>Payment:</span>
+                <span>${order.payment_method}</span>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="items-section">
+              ${order.order_items.map(item => {
+                let itemName = item.name;
+                let itemDetails = '';
+                if (item.variation) {
+                  itemDetails += `<div class="item-details">Size: ${item.variation.name}</div>`;
+                }
+                if (item.add_ons && item.add_ons.length > 0) {
+                  const addOnsList = item.add_ons.map((addon: any) => 
+                    addon.quantity > 1 ? `${addon.name} x${addon.quantity}` : addon.name
+                  ).join(', ');
+                  itemDetails += `<div class="item-details">+ ${addOnsList}</div>`;
+                }
+                return `
+                  <div class="item-row">
+                    <div class="item-name">${itemName}</div>
+                    ${itemDetails}
+                    <div class="item-line">
+                      <div class="item-qty-price">
+                        <span>${item.quantity}x ₱${item.unit_price.toFixed(2)}</span>
+                        <span>₱${item.subtotal.toFixed(2)}</span>
+                      </div>
                     </div>
                   </div>
+                `;
+              }).join('')}
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="total-section">
+              <div class="total-row">
+                <span>TOTAL:</span>
+                <span>₱${order.total.toFixed(2)}</span>
+              </div>
+            </div>
+
+            ${order.notes ? `
+            <div class="divider"></div>
+            <div class="info-section">
+              <div style="font-size: 10px;">
+                <strong>Notes:</strong> ${order.notes}
+              </div>
+            </div>
+            ` : ''}
+
+            <div class="divider"></div>
+
+            <div class="footer">
+              <p>Thank you for your order!</p>
+              <p>Order #${order.id.slice(-8).toUpperCase()}</p>
+              <p style="margin-top: 5px;">${new Date().toLocaleString('en-US', { 
+                month: 'short', 
+                day: 'numeric',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              })}</p>
+            </div>
+
+            <div class="button-container no-print">
+              <button onclick="window.print()">Print Receipt</button>
+            </div>
+          </body>
+        </html>
+      `;
+
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+      if (iframeDoc) {
+        iframeDoc.open();
+        iframeDoc.write(receiptHTML);
+        iframeDoc.close();
+        
+        // Wait for content to load, then trigger print
+        setTimeout(() => {
+          if (iframe.contentWindow) {
+            iframe.contentWindow.focus();
+            iframe.contentWindow.print();
+          }
+          // Clean up after printing
+          setTimeout(() => {
+            document.body.removeChild(iframe);
+          }, 1000);
+        }, 250);
+      }
+    } else {
+      // Desktop: Use window.open approach
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        // Fallback to iframe if popup is blocked
+        const iframe = document.createElement('iframe');
+        iframe.style.position = 'fixed';
+        iframe.style.right = '0';
+        iframe.style.bottom = '0';
+        iframe.style.width = '0';
+        iframe.style.height = '0';
+        iframe.style.border = '0';
+        document.body.appendChild(iframe);
+
+        const receiptHTML = `
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <title>Receipt - Order #${order.id.slice(-8).toUpperCase()}</title>
+              <style>
+                @media print {
+                  @page {
+                    margin: 0;
+                    size: 80mm auto;
+                  }
+                  body {
+                    margin: 0;
+                    padding: 10px;
+                    width: 80mm;
+                  }
+                  .no-print {
+                    display: none !important;
+                  }
+                }
+                * {
+                  margin: 0;
+                  padding: 0;
+                  box-sizing: border-box;
+                }
+                body {
+                  font-family: 'Courier New', monospace;
+                  width: 80mm;
+                  max-width: 80mm;
+                  margin: 0 auto;
+                  padding: 15px 10px;
+                  color: #000;
+                  font-size: 12px;
+                  line-height: 1.3;
+                }
+                .header {
+                  text-align: center;
+                  margin-bottom: 15px;
+                  padding-bottom: 10px;
+                  border-bottom: 1px dashed #000;
+                }
+                .header h1 {
+                  margin: 0;
+                  font-size: 16px;
+                  font-weight: bold;
+                  text-transform: uppercase;
+                  letter-spacing: 1px;
+                }
+                .header p {
+                  margin: 3px 0;
+                  font-size: 10px;
+                }
+                .divider {
+                  border-top: 1px dashed #000;
+                  margin: 8px 0;
+                }
+                .info-section {
+                  margin-bottom: 10px;
+                  font-size: 11px;
+                }
+                .info-row {
+                  display: flex;
+                  justify-content: space-between;
+                  margin: 3px 0;
+                  font-size: 11px;
+                }
+                .info-label {
+                  font-weight: bold;
+                }
+                .items-section {
+                  margin: 10px 0;
+                }
+                .item-row {
+                  margin: 5px 0;
+                  font-size: 11px;
+                }
+                .item-name {
+                  font-weight: bold;
+                  margin-bottom: 2px;
+                }
+                .item-details {
+                  font-size: 10px;
+                  color: #333;
+                  margin-left: 5px;
+                  margin-bottom: 2px;
+                }
+                .item-line {
+                  display: flex;
+                  justify-content: space-between;
+                  margin-top: 3px;
+                }
+                .item-qty-price {
+                  display: flex;
+                  justify-content: space-between;
+                  width: 100%;
+                }
+                .total-section {
+                  margin-top: 10px;
+                  padding-top: 8px;
+                  border-top: 2px dashed #000;
+                }
+                .total-row {
+                  display: flex;
+                  justify-content: space-between;
+                  font-size: 14px;
+                  font-weight: bold;
+                  margin: 5px 0;
+                }
+                .footer {
+                  text-align: center;
+                  margin-top: 15px;
+                  padding-top: 10px;
+                  border-top: 1px dashed #000;
+                  font-size: 10px;
+                }
+                .button-container {
+                  text-align: center;
+                  margin: 20px 0;
+                }
+                button {
+                  background-color: #bf9675;
+                  color: white;
+                  border: none;
+                  padding: 12px 24px;
+                  font-size: 14px;
+                  border-radius: 6px;
+                  cursor: pointer;
+                  font-weight: bold;
+                }
+                button:hover {
+                  background-color: #a88262;
+                }
+              </style>
+            </head>
+            <body>
+              <div class="header">
+                <h1>Joe's Cafe & Resto</h1>
+                <p>Order Receipt</p>
+              </div>
+
+              <div class="divider"></div>
+
+              <div class="info-section">
+                <div class="info-row">
+                  <span class="info-label">Order #:</span>
+                  <span>${order.id.slice(-8).toUpperCase()}</span>
                 </div>
-              `;
-            }).join('')}
-          </div>
+                <div class="info-row">
+                  <span>Date:</span>
+                  <span>${new Date(order.created_at).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}</span>
+                </div>
+                <div class="info-row">
+                  <span>Time:</span>
+                  <span>${new Date(order.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
+                </div>
+                <div class="info-row">
+                  <span>Status:</span>
+                  <span>${order.status.charAt(0).toUpperCase() + order.status.slice(1)}</span>
+                </div>
+              </div>
 
-          <div class="divider"></div>
+              <div class="divider"></div>
 
-          <div class="total-section">
-            <div class="total-row">
-              <span>TOTAL:</span>
-              <span>₱${order.total.toFixed(2)}</span>
+              <div class="info-section">
+                <div class="info-row">
+                  <span class="info-label">Customer:</span>
+                  <span>${order.customer_name}</span>
+                </div>
+                <div class="info-row">
+                  <span>Contact:</span>
+                  <span>${order.contact_number}</span>
+                </div>
+                <div class="info-row">
+                  <span>Service:</span>
+                  <span>${formatServiceTypeDisplay(order.service_type)}</span>
+                </div>
+                ${order.address ? `
+                <div class="info-row">
+                  <span>Address:</span>
+                  <span style="text-align: right; max-width: 60%;">${order.address}</span>
+                </div>
+                ` : ''}
+                ${order.pickup_time ? `
+                <div class="info-row">
+                  <span>Pickup:</span>
+                  <span>${order.pickup_time}</span>
+                </div>
+                ` : ''}
+                ${order.party_size ? `
+                <div class="info-row">
+                  <span>Party:</span>
+                  <span>${order.party_size} person${order.party_size !== 1 ? 's' : ''}</span>
+                </div>
+                ` : ''}
+                ${order.dine_in_time ? `
+                <div class="info-row">
+                  <span>Dine-in:</span>
+                  <span>${new Date(order.dine_in_time).toLocaleString('en-US', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
+                </div>
+                ` : ''}
+                <div class="info-row">
+                  <span>Payment:</span>
+                  <span>${order.payment_method}</span>
+                </div>
+              </div>
+
+              <div class="divider"></div>
+
+              <div class="items-section">
+                ${order.order_items.map(item => {
+                  let itemName = item.name;
+                  let itemDetails = '';
+                  if (item.variation) {
+                    itemDetails += `<div class="item-details">Size: ${item.variation.name}</div>`;
+                  }
+                  if (item.add_ons && item.add_ons.length > 0) {
+                    const addOnsList = item.add_ons.map((addon: any) => 
+                      addon.quantity > 1 ? `${addon.name} x${addon.quantity}` : addon.name
+                    ).join(', ');
+                    itemDetails += `<div class="item-details">+ ${addOnsList}</div>`;
+                  }
+                  return `
+                    <div class="item-row">
+                      <div class="item-name">${itemName}</div>
+                      ${itemDetails}
+                      <div class="item-line">
+                        <div class="item-qty-price">
+                          <span>${item.quantity}x ₱${item.unit_price.toFixed(2)}</span>
+                          <span>₱${item.subtotal.toFixed(2)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+
+              <div class="divider"></div>
+
+              <div class="total-section">
+                <div class="total-row">
+                  <span>TOTAL:</span>
+                  <span>₱${order.total.toFixed(2)}</span>
+                </div>
+              </div>
+
+              ${order.notes ? `
+              <div class="divider"></div>
+              <div class="info-section">
+                <div style="font-size: 10px;">
+                  <strong>Notes:</strong> ${order.notes}
+                </div>
+              </div>
+              ` : ''}
+
+              <div class="divider"></div>
+
+              <div class="footer">
+                <p>Thank you for your order!</p>
+                <p>Order #${order.id.slice(-8).toUpperCase()}</p>
+                <p style="margin-top: 5px;">${new Date().toLocaleString('en-US', { 
+                  month: 'short', 
+                  day: 'numeric',
+                  year: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}</p>
+              </div>
+
+              <div class="button-container no-print">
+                <button onclick="window.print()">Print Receipt</button>
+              </div>
+            </body>
+          </html>
+        `;
+
+        const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+        if (iframeDoc) {
+          iframeDoc.open();
+          iframeDoc.write(receiptHTML);
+          iframeDoc.close();
+          
+          setTimeout(() => {
+            if (iframe.contentWindow) {
+              iframe.contentWindow.focus();
+              iframe.contentWindow.print();
+            }
+            setTimeout(() => {
+              document.body.removeChild(iframe);
+            }, 1000);
+          }, 250);
+        }
+        return;
+      }
+
+      const receiptHTML = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Receipt - Order #${order.id.slice(-8).toUpperCase()}</title>
+            <style>
+              @media print {
+                @page {
+                  margin: 0;
+                  size: 80mm auto;
+                }
+                body {
+                  margin: 0;
+                  padding: 10px;
+                  width: 80mm;
+                }
+                .no-print {
+                  display: none;
+                }
+              }
+              * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+              }
+              body {
+                font-family: 'Courier New', monospace;
+                width: 80mm;
+                max-width: 80mm;
+                margin: 0 auto;
+                padding: 15px 10px;
+                color: #000;
+                font-size: 12px;
+                line-height: 1.3;
+              }
+              .header {
+                text-align: center;
+                margin-bottom: 15px;
+                padding-bottom: 10px;
+                border-bottom: 1px dashed #000;
+              }
+              .header h1 {
+                margin: 0;
+                font-size: 16px;
+                font-weight: bold;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+              }
+              .header p {
+                margin: 3px 0;
+                font-size: 10px;
+              }
+              .divider {
+                border-top: 1px dashed #000;
+                margin: 8px 0;
+              }
+              .info-section {
+                margin-bottom: 10px;
+                font-size: 11px;
+              }
+              .info-row {
+                display: flex;
+                justify-content: space-between;
+                margin: 3px 0;
+                font-size: 11px;
+              }
+              .info-label {
+                font-weight: bold;
+              }
+              .items-section {
+                margin: 10px 0;
+              }
+              .item-row {
+                margin: 5px 0;
+                font-size: 11px;
+              }
+              .item-name {
+                font-weight: bold;
+                margin-bottom: 2px;
+              }
+              .item-details {
+                font-size: 10px;
+                color: #333;
+                margin-left: 5px;
+                margin-bottom: 2px;
+              }
+              .item-line {
+                display: flex;
+                justify-content: space-between;
+                margin-top: 3px;
+              }
+              .item-qty-price {
+                display: flex;
+                justify-content: space-between;
+                width: 100%;
+              }
+              .total-section {
+                margin-top: 10px;
+                padding-top: 8px;
+                border-top: 2px dashed #000;
+              }
+              .total-row {
+                display: flex;
+                justify-content: space-between;
+                font-size: 14px;
+                font-weight: bold;
+                margin: 5px 0;
+              }
+              .footer {
+                text-align: center;
+                margin-top: 15px;
+                padding-top: 10px;
+                border-top: 1px dashed #000;
+                font-size: 10px;
+              }
+              .button-container {
+                text-align: center;
+                margin: 20px 0;
+              }
+              button {
+                background-color: #bf9675;
+                color: white;
+                border: none;
+                padding: 12px 24px;
+                font-size: 14px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-weight: bold;
+              }
+              button:hover {
+                background-color: #a88262;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <h1>Joe's Cafe & Resto</h1>
+              <p>Order Receipt</p>
             </div>
-          </div>
 
-          ${order.notes ? `
-          <div class="divider"></div>
-          <div class="info-section">
-            <div style="font-size: 10px;">
-              <strong>Notes:</strong> ${order.notes}
+            <div class="divider"></div>
+
+            <div class="info-section">
+              <div class="info-row">
+                <span class="info-label">Order #:</span>
+                <span>${order.id.slice(-8).toUpperCase()}</span>
+              </div>
+              <div class="info-row">
+                <span>Date:</span>
+                <span>${new Date(order.created_at).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}</span>
+              </div>
+              <div class="info-row">
+                <span>Time:</span>
+                <span>${new Date(order.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
+              </div>
+              <div class="info-row">
+                <span>Status:</span>
+                <span>${order.status.charAt(0).toUpperCase() + order.status.slice(1)}</span>
+              </div>
             </div>
-          </div>
-          ` : ''}
 
-          <div class="divider"></div>
+            <div class="divider"></div>
 
-          <div class="footer">
-            <p>Thank you for your order!</p>
-            <p>Order #${order.id.slice(-8).toUpperCase()}</p>
-            <p style="margin-top: 5px;">${new Date().toLocaleString('en-US', { 
-              month: 'short', 
-              day: 'numeric',
-              year: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit'
-            })}</p>
-          </div>
+            <div class="info-section">
+              <div class="info-row">
+                <span class="info-label">Customer:</span>
+                <span>${order.customer_name}</span>
+              </div>
+              <div class="info-row">
+                <span>Contact:</span>
+                <span>${order.contact_number}</span>
+              </div>
+              <div class="info-row">
+                <span>Service:</span>
+                <span>${formatServiceTypeDisplay(order.service_type)}</span>
+              </div>
+              ${order.address ? `
+              <div class="info-row">
+                <span>Address:</span>
+                <span style="text-align: right; max-width: 60%;">${order.address}</span>
+              </div>
+              ` : ''}
+              ${order.pickup_time ? `
+              <div class="info-row">
+                <span>Pickup:</span>
+                <span>${order.pickup_time}</span>
+              </div>
+              ` : ''}
+              ${order.party_size ? `
+              <div class="info-row">
+                <span>Party:</span>
+                <span>${order.party_size} person${order.party_size !== 1 ? 's' : ''}</span>
+              </div>
+              ` : ''}
+              ${order.dine_in_time ? `
+              <div class="info-row">
+                <span>Dine-in:</span>
+                <span>${new Date(order.dine_in_time).toLocaleString('en-US', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
+              </div>
+              ` : ''}
+              <div class="info-row">
+                <span>Payment:</span>
+                <span>${order.payment_method}</span>
+              </div>
+            </div>
 
-          <div class="button-container no-print">
-            <button onclick="window.print()">Print Receipt</button>
-          </div>
-        </body>
-      </html>
-    `;
+            <div class="divider"></div>
 
-    printWindow.document.write(receiptHTML);
-    printWindow.document.close();
-    
-    // Wait for content to load, then trigger print
-    setTimeout(() => {
-      printWindow.print();
-    }, 250);
+            <div class="items-section">
+              ${order.order_items.map(item => {
+                let itemName = item.name;
+                let itemDetails = '';
+                if (item.variation) {
+                  itemDetails += `<div class="item-details">Size: ${item.variation.name}</div>`;
+                }
+                if (item.add_ons && item.add_ons.length > 0) {
+                  const addOnsList = item.add_ons.map((addon: any) => 
+                    addon.quantity > 1 ? `${addon.name} x${addon.quantity}` : addon.name
+                  ).join(', ');
+                  itemDetails += `<div class="item-details">+ ${addOnsList}</div>`;
+                }
+                return `
+                  <div class="item-row">
+                    <div class="item-name">${itemName}</div>
+                    ${itemDetails}
+                    <div class="item-line">
+                      <div class="item-qty-price">
+                        <span>${item.quantity}x ₱${item.unit_price.toFixed(2)}</span>
+                        <span>₱${item.subtotal.toFixed(2)}</span>
+                      </div>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="total-section">
+              <div class="total-row">
+                <span>TOTAL:</span>
+                <span>₱${order.total.toFixed(2)}</span>
+              </div>
+            </div>
+
+            ${order.notes ? `
+            <div class="divider"></div>
+            <div class="info-section">
+              <div style="font-size: 10px;">
+                <strong>Notes:</strong> ${order.notes}
+              </div>
+            </div>
+            ` : ''}
+
+            <div class="divider"></div>
+
+            <div class="footer">
+              <p>Thank you for your order!</p>
+              <p>Order #${order.id.slice(-8).toUpperCase()}</p>
+              <p style="margin-top: 5px;">${new Date().toLocaleString('en-US', { 
+                month: 'short', 
+                day: 'numeric',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              })}</p>
+            </div>
+
+            <div class="button-container no-print">
+              <button onclick="window.print()">Print Receipt</button>
+            </div>
+          </body>
+        </html>
+      `;
+
+      printWindow.document.write(receiptHTML);
+      printWindow.document.close();
+      
+      // Wait for content to load, then trigger print
+      setTimeout(() => {
+        printWindow.print();
+      }, 250);
+    }
   };
 
   // Calculate total sales from completed orders
