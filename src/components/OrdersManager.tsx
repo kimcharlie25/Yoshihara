@@ -241,1145 +241,527 @@ const OrdersManager: React.FC<OrdersManagerProps> = ({ onBack }) => {
       alert('Invalid order data. Cannot generate receipt.');
       return;
     }
-
-    // Note: Modal is not closed here since print button is now outside the modal
-
-    // Find the latest order data from the orders array to ensure we have the most current data
-    const latestOrder = orders.find(o => o.id === order.id) || order;
     
-    // Create a safe copy of order data to prevent closure issues
-    const orderData = {
-      id: latestOrder.id,
-      customer_name: latestOrder.customer_name || '',
-      contact_number: latestOrder.contact_number || '',
-      service_type: latestOrder.service_type || 'dine-in',
-      address: latestOrder.address || null,
-      pickup_time: latestOrder.pickup_time || null,
-      party_size: latestOrder.party_size || null,
-      dine_in_time: latestOrder.dine_in_time || null,
-      payment_method: latestOrder.payment_method || '',
-      notes: latestOrder.notes || null,
-      total: latestOrder.total || 0,
-      status: latestOrder.status || 'pending',
-      created_at: latestOrder.created_at || new Date().toISOString(),
-    };
-
-    // Ensure order_items exists and is an array - use the latest order's items
-    const latestOrderItems = Array.isArray(latestOrder.order_items) ? latestOrder.order_items : [];
-    const orderItems = latestOrderItems.map(item => {
-      // Safely extract item data
-      const itemName = item.name || 'Unknown Item';
-      const itemVariation = item.variation;
-      const itemAddOns = item.add_ons;
-      const itemUnitPrice = typeof item.unit_price === 'number' ? item.unit_price : parseFloat(item.unit_price) || 0;
-      const itemQuantity = typeof item.quantity === 'number' ? item.quantity : parseInt(item.quantity) || 1;
-      const itemSubtotal = typeof item.subtotal === 'number' ? item.subtotal : parseFloat(item.subtotal) || (itemUnitPrice * itemQuantity);
+    try {
+      // Find the latest order data from the orders array to ensure we have the most current data
+      const latestOrder = orders.find(o => o.id === order.id) || order;
       
-      return {
-        id: item.id || '',
-        name: itemName,
-        variation: itemVariation,
-        add_ons: itemAddOns,
-        unit_price: itemUnitPrice,
-        quantity: itemQuantity,
-        subtotal: itemSubtotal,
+      // Create a safe copy of order data
+      const orderData = {
+        id: latestOrder.id,
+        customer_name: latestOrder.customer_name || '',
+        contact_number: latestOrder.contact_number || '',
+        service_type: latestOrder.service_type || 'dine-in',
+        address: latestOrder.address || null,
+        pickup_time: latestOrder.pickup_time || null,
+        party_size: latestOrder.party_size || null,
+        dine_in_time: latestOrder.dine_in_time || null,
+        payment_method: latestOrder.payment_method || '',
+        notes: latestOrder.notes || null,
+        total: latestOrder.total || 0,
+        status: latestOrder.status || 'pending',
+        created_at: latestOrder.created_at || new Date().toISOString(),
       };
-    });
-    
-    // Debug logging (can be removed in production)
-    console.log('Printing receipt for order:', orderData.id);
-    console.log('Order items count:', orderItems.length);
-    console.log('Order total:', orderData.total);
-    
-    const formatServiceTypeDisplay = (serviceType: string) => {
-      return serviceType === 'over-the-counter' 
-        ? 'Over the Counter' 
-        : serviceType.charAt(0).toUpperCase() + serviceType.slice(1).replace(/-/g, ' ');
-    };
 
-    // Helper function to safely get variation name
-    const getVariationName = (variation: any): string => {
-      if (!variation) return '';
-      if (typeof variation === 'string') {
-        try {
-          const parsed = JSON.parse(variation);
-          return parsed?.name || '';
-        } catch {
-          return '';
-        }
-      }
-      return variation?.name || '';
-    };
-
-    // Helper function to safely get add-ons
-    const getAddOns = (addOns: any): any[] => {
-      if (!addOns) return [];
-      if (typeof addOns === 'string') {
-        try {
-          return JSON.parse(addOns);
-        } catch {
-          return [];
-        }
-      }
-      return Array.isArray(addOns) ? addOns : [];
-    };
-
-    // Detect if we're on mobile
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    
-    // For mobile, use iframe approach which is more reliable
-    if (isMobile) {
-      // Hide parent page content during printing
-      const originalBodyDisplay = document.body.style.display;
-      const originalHtmlDisplay = document.documentElement.style.display;
-      const originalBodyVisibility = document.body.style.visibility;
-      const originalHtmlVisibility = document.documentElement.style.visibility;
+      // Ensure order_items exists and is an array
+      const latestOrderItems = Array.isArray(latestOrder.order_items) ? latestOrder.order_items : [];
+      const orderItems = latestOrderItems.map(item => {
+        const itemName = item.name || 'Unknown Item';
+        const itemVariation = item.variation;
+        const itemAddOns = item.add_ons;
+        const itemUnitPrice = typeof item.unit_price === 'number' ? item.unit_price : parseFloat(String(item.unit_price)) || 0;
+        const itemQuantity = typeof item.quantity === 'number' ? item.quantity : parseInt(String(item.quantity)) || 1;
+        const itemSubtotal = typeof item.subtotal === 'number' ? item.subtotal : parseFloat(String(item.subtotal)) || (itemUnitPrice * itemQuantity);
+        
+        return {
+          id: item.id || '',
+          name: itemName,
+          variation: itemVariation,
+          add_ons: itemAddOns,
+          unit_price: itemUnitPrice,
+          quantity: itemQuantity,
+          subtotal: itemSubtotal,
+        };
+      });
       
-      // Create a hidden iframe for mobile printing
-      const iframe = document.createElement('iframe');
-      iframe.setAttribute('id', 'receipt-print-iframe');
-      iframe.style.position = 'fixed';
-      iframe.style.right = '0';
-      iframe.style.bottom = '0';
-      iframe.style.width = '0';
-      iframe.style.height = '0';
-      iframe.style.border = '0';
-      iframe.style.opacity = '0';
-      iframe.style.pointerEvents = 'none';
-      iframe.style.zIndex = '999999';
-      document.body.appendChild(iframe);
+      const formatServiceTypeDisplay = (serviceType: string) => {
+        if (serviceType === 'over-the-counter') return 'Over the Counter';
+        return serviceType.charAt(0).toUpperCase() + serviceType.slice(1).replace(/-/g, ' ');
+      };
 
-      const receiptHTML = `
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <title>Receipt - Order #${orderData.id.slice(-8).toUpperCase()}</title>
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <style>
-              @media print {
-                @page {
-                  margin: 0;
-                  size: 58mm auto;
-                }
-                html, body {
-                  margin: 0 !important;
-                  padding: 10px !important;
-                  width: 58mm !important;
-                  height: auto !important;
-                  overflow: visible !important;
-                }
-                body * {
-                  visibility: visible;
-                }
-                .no-print {
-                  display: none !important;
-                }
+      // Helper function to safely get variation name
+      const getVariationName = (variation: any): string => {
+        if (!variation) return '';
+        if (typeof variation === 'string') {
+          try {
+            const parsed = JSON.parse(variation);
+            return parsed?.name || '';
+          } catch {
+            return '';
+          }
+        }
+        return variation?.name || '';
+      };
+
+      // Helper function to safely get add-ons
+      const getAddOns = (addOns: any): any[] => {
+        if (!addOns) return [];
+        if (typeof addOns === 'string') {
+          try {
+            return JSON.parse(addOns);
+          } catch {
+            return [];
+          }
+        }
+        return Array.isArray(addOns) ? addOns : [];
+      };
+
+    // Create receipt HTML for 58mm thermal printer
+    // Include auto-print and back button for mobile
+    const receiptHTML = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Receipt - Order #${orderData.id.slice(-8).toUpperCase()}</title>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <script>
+            // Auto-print when page loads (for mobile redirect)
+            window.addEventListener('load', function() {
+              // Check if we're in a mobile context
+              const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+              if (isMobile && window.opener === null) {
+                // We navigated here directly, auto-print after a short delay
+                setTimeout(function() {
+                  window.print();
+                }, 500);
               }
-              * {
+            });
+            
+            // Handle after print - go back if we navigated here
+            window.addEventListener('afterprint', function() {
+              const returnUrl = sessionStorage.getItem('returnUrl');
+              if (returnUrl && window.opener === null) {
+                setTimeout(function() {
+                  window.location.href = returnUrl;
+                }, 500);
+              }
+            });
+          </script>
+          <style>
+            @media print {
+              @page {
                 margin: 0;
-                padding: 0;
-                box-sizing: border-box;
+                size: 58mm auto;
               }
-              html {
-                width: 58mm;
-                max-width: 58mm;
-                margin: 0;
-                padding: 0;
+              html, body {
+                margin: 0 !important;
+                padding: 5mm !important;
+                width: 58mm !important;
+                height: auto !important;
+                overflow: visible !important;
               }
-              body {
-                font-family: 'Courier New', monospace;
-                width: 58mm;
-                max-width: 58mm;
-                margin: 0 auto;
-                padding: 15px 10px;
-                color: #000;
-                font-size: 12px;
-                line-height: 1.3;
-                background: white;
-                overflow: visible;
+              .no-print {
+                display: none !important;
               }
-              .header {
-                text-align: center;
-                margin-bottom: 15px;
-                padding-bottom: 10px;
-                border-bottom: 1px dashed #000;
-              }
-              .header h1 {
-                margin: 0;
-                font-size: 16px;
-                font-weight: bold;
-                text-transform: uppercase;
-                letter-spacing: 1px;
-              }
-              .header p {
-                margin: 3px 0;
-                font-size: 10px;
-              }
-              .divider {
-                border-top: 1px dashed #000;
-                margin: 8px 0;
-              }
-              .info-section {
-                margin-bottom: 10px;
-                font-size: 11px;
-              }
-              .info-row {
-                display: flex;
-                justify-content: space-between;
-                margin: 3px 0;
-                font-size: 11px;
-              }
-              .info-label {
-                font-weight: bold;
-              }
-              .items-section {
-                margin: 10px 0;
-              }
-              .item-row {
-                margin: 5px 0;
-                font-size: 11px;
-              }
-              .item-name {
-                font-weight: bold;
-                margin-bottom: 2px;
-              }
-              .item-details {
-                font-size: 10px;
-                color: #333;
-                margin-left: 5px;
-                margin-bottom: 2px;
-              }
-              .item-line {
-                display: flex;
-                justify-content: space-between;
-                margin-top: 3px;
-              }
-              .item-qty-price {
-                display: flex;
-                justify-content: space-between;
-                width: 100%;
-              }
-              .total-section {
-                margin-top: 10px;
-                padding-top: 8px;
-                border-top: 2px dashed #000;
-              }
-              .total-row {
-                display: flex;
-                justify-content: space-between;
-                font-size: 14px;
-                font-weight: bold;
-                margin: 5px 0;
-              }
-              .footer {
-                text-align: center;
-                margin-top: 15px;
-                padding-top: 10px;
-                border-top: 1px dashed #000;
-                font-size: 10px;
-              }
-              .button-container {
-                text-align: center;
-                margin: 20px 0;
-              }
-              button {
-                background-color: #bf9675;
-                color: white;
-                border: none;
-                padding: 12px 24px;
-                font-size: 14px;
-                border-radius: 6px;
-                cursor: pointer;
-                font-weight: bold;
-              }
-              button:hover {
-                background-color: #a88262;
-              }
-            </style>
-          </head>
-          <body>
-            <div class="header">
-              <h1>Joe's Cafe & Resto</h1>
-              <p>Order Receipt</p>
+            }
+            * {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
+            }
+            html {
+              width: 58mm;
+              max-width: 58mm;
+              margin: 0;
+              padding: 0;
+            }
+            body {
+              font-family: 'Courier New', monospace;
+              width: 58mm;
+              max-width: 58mm;
+              margin: 0 auto;
+              padding: 5mm;
+              color: #000;
+              font-size: 10px;
+              line-height: 1.2;
+              background: white;
+            }
+            .header {
+              text-align: center;
+              margin-bottom: 8px;
+              padding-bottom: 5px;
+              border-bottom: 1px dashed #000;
+            }
+            .header h1 {
+              margin: 0;
+              font-size: 14px;
+              font-weight: bold;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+            }
+            .header p {
+              margin: 2px 0;
+              font-size: 9px;
+            }
+            .divider {
+              border-top: 1px dashed #000;
+              margin: 5px 0;
+            }
+            .info-section {
+              margin-bottom: 6px;
+              font-size: 9px;
+            }
+            .info-row {
+              display: flex;
+              justify-content: space-between;
+              margin: 2px 0;
+              font-size: 9px;
+            }
+            .info-label {
+              font-weight: bold;
+            }
+            .items-section {
+              margin: 6px 0;
+            }
+            .item-row {
+              margin: 4px 0;
+              font-size: 9px;
+            }
+            .item-name {
+              font-weight: bold;
+              margin-bottom: 1px;
+            }
+            .item-details {
+              font-size: 8px;
+              color: #333;
+              margin-left: 3px;
+              margin-bottom: 1px;
+            }
+            .item-line {
+              display: flex;
+              justify-content: space-between;
+              margin-top: 2px;
+            }
+            .item-qty-price {
+              display: flex;
+              justify-content: space-between;
+              width: 100%;
+            }
+            .total-section {
+              margin-top: 8px;
+              padding-top: 5px;
+              border-top: 2px dashed #000;
+            }
+            .total-row {
+              display: flex;
+              justify-content: space-between;
+              font-size: 12px;
+              font-weight: bold;
+              margin: 3px 0;
+            }
+            .footer {
+              text-align: center;
+              margin-top: 10px;
+              padding-top: 5px;
+              border-top: 1px dashed #000;
+              font-size: 8px;
+            }
+            .button-container {
+              text-align: center;
+              margin: 15px 0;
+            }
+            button {
+              background-color: #bf9675;
+              color: white;
+              border: none;
+              padding: 10px 20px;
+              font-size: 12px;
+              border-radius: 6px;
+              cursor: pointer;
+              font-weight: bold;
+            }
+            button:hover {
+              background-color: #a88262;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>Joe's Cafe & Resto</h1>
+            <p>Order Receipt</p>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="info-section">
+            <div class="info-row">
+              <span class="info-label">Order #:</span>
+              <span>${orderData.id.slice(-8).toUpperCase()}</span>
             </div>
-
-            <div class="divider"></div>
-
-            <div class="info-section">
-              <div class="info-row">
-                <span class="info-label">Order #:</span>
-                <span>${orderData.id.slice(-8).toUpperCase()}</span>
-              </div>
-              <div class="info-row">
-                <span>Date:</span>
-                <span>${new Date(orderData.created_at).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}</span>
-              </div>
-              <div class="info-row">
-                <span>Time:</span>
-                <span>${new Date(orderData.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
-              </div>
-              <div class="info-row">
-                <span>Status:</span>
-                <span>${orderData.status.charAt(0).toUpperCase() + orderData.status.slice(1)}</span>
-              </div>
+            <div class="info-row">
+              <span>Date:</span>
+              <span>${new Date(orderData.created_at).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}</span>
             </div>
-
-            <div class="divider"></div>
-
-            <div class="info-section">
-              <div class="info-row">
-                <span class="info-label">Customer:</span>
-                <span>${String(orderData.customer_name || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>
-              </div>
-              <div class="info-row">
-                <span>Contact:</span>
-                <span>${String(orderData.contact_number || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>
-              </div>
-              <div class="info-row">
-                <span>Service:</span>
-                <span>${formatServiceTypeDisplay(orderData.service_type)}</span>
-              </div>
-              ${orderData.address ? `
-              <div class="info-row">
-                <span>Address:</span>
-                <span style="text-align: right; max-width: 60%;">${String(orderData.address).replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>
-              </div>
-              ` : ''}
-              ${orderData.pickup_time ? `
-              <div class="info-row">
-                <span>Pickup:</span>
-                <span>${String(orderData.pickup_time).replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>
-              </div>
-              ` : ''}
-              ${orderData.party_size ? `
-              <div class="info-row">
-                <span>Party:</span>
-                <span>${orderData.party_size} person${orderData.party_size !== 1 ? 's' : ''}</span>
-              </div>
-              ` : ''}
-              ${orderData.dine_in_time ? `
-              <div class="info-row">
-                <span>Dine-in:</span>
-                <span>${new Date(orderData.dine_in_time).toLocaleString('en-US', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
-              </div>
-              ` : ''}
-              <div class="info-row">
-                <span>Payment:</span>
-                <span>${String(orderData.payment_method || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>
-              </div>
+            <div class="info-row">
+              <span>Time:</span>
+              <span>${new Date(orderData.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
             </div>
-
-            <div class="divider"></div>
-
-            <div class="items-section">
-              ${orderItems.length > 0 ? orderItems.map(item => {
-                const itemName = String(item.name || 'Unknown Item').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                let itemDetails = '';
-                const variationName = getVariationName(item.variation);
-                if (variationName) {
-                  itemDetails += `<div class="item-details">Size: ${String(variationName).replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
-                }
-                const addOns = getAddOns(item.add_ons);
-                if (addOns && addOns.length > 0) {
-                  const addOnsList = addOns.map((addon: any) => {
-                    const addonName = String(addon.name || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                    return addon.quantity > 1 ? `${addonName} x${addon.quantity}` : addonName;
-                  }).join(', ');
-                  itemDetails += `<div class="item-details">+ ${addOnsList}</div>`;
-                }
-                const quantity = Number(item.quantity) || 1;
-                const unitPrice = Number(item.unit_price) || 0;
-                const subtotal = Number(item.subtotal) || (unitPrice * quantity);
-                return `
-                  <div class="item-row">
-                    <div class="item-name">${itemName}</div>
-                    ${itemDetails}
-                    <div class="item-line">
-                      <div class="item-qty-price">
-                        <span>${quantity}x ₱${unitPrice.toFixed(2)}</span>
-                        <span>₱${subtotal.toFixed(2)}</span>
-                      </div>
-                    </div>
-                  </div>
-                `;
-              }).join('') : '<div class="item-row"><div class="item-name">No items found</div></div>'}
+            <div class="info-row">
+              <span>Status:</span>
+              <span>${orderData.status.charAt(0).toUpperCase() + orderData.status.slice(1)}</span>
             </div>
+          </div>
 
-            <div class="divider"></div>
+          <div class="divider"></div>
 
-            <div class="total-section">
-              <div class="total-row">
-                <span>TOTAL:</span>
-                <span>₱${orderData.total.toFixed(2)}</span>
-              </div>
+          <div class="info-section">
+            <div class="info-row">
+              <span class="info-label">Customer:</span>
+              <span>${String(orderData.customer_name || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>
             </div>
-
-            ${orderData.notes ? `
-            <div class="divider"></div>
-            <div class="info-section">
-              <div style="font-size: 10px;">
-                <strong>Notes:</strong> ${String(orderData.notes).replace(/</g, '&lt;').replace(/>/g, '&gt;')}
-              </div>
+            <div class="info-row">
+              <span>Contact:</span>
+              <span>${String(orderData.contact_number || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>
+            </div>
+            <div class="info-row">
+              <span>Service:</span>
+              <span>${formatServiceTypeDisplay(orderData.service_type)}</span>
+            </div>
+            ${orderData.address ? `
+            <div class="info-row">
+              <span>Address:</span>
+              <span style="text-align: right; max-width: 60%; word-break: break-word;">${String(orderData.address).replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>
             </div>
             ` : ''}
-
-            <div class="divider"></div>
-
-            <div class="footer">
-              <p>Thank you for your order!</p>
-              <p>Order #${orderData.id.slice(-8).toUpperCase()}</p>
-              <p style="margin-top: 5px;">${new Date().toLocaleString('en-US', { 
-                month: 'short', 
-                day: 'numeric',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-              })}</p>
+            ${orderData.pickup_time ? `
+            <div class="info-row">
+              <span>Pickup:</span>
+              <span>${String(orderData.pickup_time).replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>
             </div>
+            ` : ''}
+            ${orderData.party_size ? `
+            <div class="info-row">
+              <span>Party:</span>
+              <span>${orderData.party_size} person${orderData.party_size !== 1 ? 's' : ''}</span>
+            </div>
+            ` : ''}
+            ${orderData.dine_in_time ? `
+            <div class="info-row">
+              <span>Dine-in:</span>
+              <span>${new Date(orderData.dine_in_time).toLocaleString('en-US', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
+            </div>
+            ` : ''}
+            <div class="info-row">
+              <span>Payment:</span>
+              <span>${String(orderData.payment_method || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="items-section">
+            ${orderItems.length > 0 ? orderItems.map(item => {
+              const itemName = String(item.name || 'Unknown Item').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+              let itemDetails = '';
+              const variationName = getVariationName(item.variation);
+              if (variationName) {
+                itemDetails += `<div class="item-details">Size: ${String(variationName).replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
+              }
+              const addOns = getAddOns(item.add_ons);
+              if (addOns && addOns.length > 0) {
+                const addOnsList = addOns.map((addon: any) => {
+                  const addonName = String(addon.name || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                  return addon.quantity > 1 ? `${addonName} x${addon.quantity}` : addonName;
+                }).join(', ');
+                itemDetails += `<div class="item-details">+ ${addOnsList}</div>`;
+              }
+              const quantity = Number(item.quantity) || 1;
+              const unitPrice = Number(item.unit_price) || 0;
+              const subtotal = Number(item.subtotal) || (unitPrice * quantity);
+              return `
+                <div class="item-row">
+                  <div class="item-name">${itemName}</div>
+                  ${itemDetails}
+                  <div class="item-line">
+                    <div class="item-qty-price">
+                      <span>${quantity}x ₱${unitPrice.toFixed(2)}</span>
+                      <span>₱${subtotal.toFixed(2)}</span>
+                    </div>
+                  </div>
+                </div>
+              `;
+            }).join('') : '<div class="item-row"><div class="item-name">No items found</div></div>'}
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="total-section">
+            <div class="total-row">
+              <span>TOTAL:</span>
+              <span>₱${orderData.total.toFixed(2)}</span>
+            </div>
+          </div>
+
+          ${orderData.notes ? `
+          <div class="divider"></div>
+          <div class="info-section">
+            <div style="font-size: 8px;">
+              <strong>Notes:</strong> ${String(orderData.notes).replace(/</g, '&lt;').replace(/>/g, '&gt;')}
+            </div>
+          </div>
+          ` : ''}
+
+          <div class="divider"></div>
+
+          <div class="footer">
+            <p>Thank you for your order!</p>
+            <p>Order #${orderData.id.slice(-8).toUpperCase()}</p>
+            <p style="margin-top: 3px;">${new Date().toLocaleString('en-US', { 
+              month: 'short', 
+              day: 'numeric',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            })}</p>
+          </div>
 
             <div class="button-container no-print">
               <button onclick="window.print()">Print Receipt</button>
+              <button onclick="goBack()" style="margin-top: 10px; background-color: #6b7280;">Go Back</button>
             </div>
-          </body>
-        </html>
+          <script>
+            function goBack() {
+              const returnUrl = sessionStorage.getItem('returnUrl');
+              if (returnUrl) {
+                window.location.href = returnUrl;
+              } else if (window.opener) {
+                window.close();
+              } else {
+                window.history.back();
+              }
+            }
+          </script>
+        </body>
+      </html>
       `;
 
-      const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-      if (iframeDoc) {
-        iframeDoc.open();
-        iframeDoc.write(receiptHTML);
-        iframeDoc.close();
+      // Use data URL approach for all devices - most reliable
+      // Create a data URL with the receipt HTML
+      const dataUrl = 'data:text/html;charset=utf-8,' + encodeURIComponent(receiptHTML);
+      
+      // Detect if we're on mobile/tablet
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      
+      if (isMobile) {
+        // For Android tablets: Navigate directly to receipt page
+        // Store current location to return after printing
+        const currentUrl = window.location.href;
+        try {
+          sessionStorage.setItem('returnUrl', currentUrl);
+        } catch (e) {
+          console.warn('Could not store return URL:', e);
+        }
         
-        // Wait for content to load, then trigger print
-        setTimeout(() => {
-          if (iframe.contentWindow && iframe.contentDocument) {
-            // Hide parent page completely before printing
-            document.body.style.display = 'none';
-            document.documentElement.style.display = 'none';
-            document.body.style.visibility = 'hidden';
-            document.documentElement.style.visibility = 'hidden';
-            
-            // Add print event listener to hide parent page
-            const handleBeforePrint = () => {
-              document.body.style.display = 'none';
-              document.documentElement.style.display = 'none';
-              document.body.style.visibility = 'hidden';
-              document.documentElement.style.visibility = 'hidden';
-            };
-            
-            const handleAfterPrint = () => {
-              document.body.style.display = originalBodyDisplay;
-              document.documentElement.style.display = originalHtmlDisplay;
-              document.body.style.visibility = originalBodyVisibility;
-              document.documentElement.style.visibility = originalHtmlVisibility;
-              setTimeout(() => {
-                const iframeEl = document.getElementById('receipt-print-iframe');
-                if (iframeEl && iframeEl.parentNode) {
-                  iframeEl.parentNode.removeChild(iframeEl);
-                }
-              }, 100);
-            };
-            
-            // Listen for print events
-            iframe.contentWindow.addEventListener('beforeprint', handleBeforePrint);
-            iframe.contentWindow.addEventListener('afterprint', handleAfterPrint);
-            
-            // Focus and print from iframe
-            iframe.contentWindow.focus();
-            
-            // Small delay to ensure parent is hidden
-            setTimeout(() => {
-              iframe.contentWindow?.print();
-            }, 100);
-            
-            // Restore parent page after printing (fallback)
-            setTimeout(() => {
-              document.body.style.display = originalBodyDisplay;
-              document.documentElement.style.display = originalHtmlDisplay;
-              document.body.style.visibility = originalBodyVisibility;
-              document.documentElement.style.visibility = originalHtmlVisibility;
-              const iframeEl = document.getElementById('receipt-print-iframe');
-              if (iframeEl && iframeEl.parentNode) {
-                iframeEl.parentNode.removeChild(iframeEl);
-              }
-            }, 3000);
+        // Try to navigate to the receipt page
+        try {
+          window.location.href = dataUrl;
+        } catch (e) {
+          // If navigation fails, try opening in new window
+          console.error('Navigation failed, trying window.open:', e);
+          const printWindow = window.open(dataUrl, '_blank');
+          if (!printWindow) {
+            alert('Please allow popups to print the receipt, or try again.');
           }
-        }, 500);
-      }
-    } else {
-      // Desktop: Use window.open approach
-      const printWindow = window.open('', '_blank', 'width=300,height=600');
-      if (!printWindow) {
-        // Fallback to iframe if popup is blocked
-        const originalBodyDisplay = document.body.style.display;
-        const originalHtmlDisplay = document.documentElement.style.display;
-        const originalBodyVisibility = document.body.style.visibility;
-        const originalHtmlVisibility = document.documentElement.style.visibility;
+        }
+      } else {
+        // Desktop: Open in new window with data URL
+        const printWindow = window.open(dataUrl, '_blank', 'width=300,height=600');
         
-        const iframe = document.createElement('iframe');
-        iframe.setAttribute('id', 'receipt-print-iframe-desktop');
-        iframe.style.position = 'fixed';
-        iframe.style.right = '0';
-        iframe.style.bottom = '0';
-        iframe.style.width = '0';
-        iframe.style.height = '0';
-        iframe.style.border = '0';
-        iframe.style.opacity = '0';
-        iframe.style.pointerEvents = 'none';
-        iframe.style.zIndex = '999999';
-        document.body.appendChild(iframe);
-
-        const receiptHTML = `
-          <!DOCTYPE html>
-          <html>
-            <head>
-              <title>Receipt - Order #${orderData.id.slice(-8).toUpperCase()}</title>
-              <style>
-                @media print {
-                  @page {
-                    margin: 0;
-                    size: 58mm auto;
-                  }
-                  html, body {
-                    margin: 0 !important;
-                    padding: 10px !important;
-                    width: 58mm !important;
-                    height: auto !important;
-                    overflow: visible !important;
-                  }
-                  body * {
-                    visibility: visible;
-                  }
-                  .no-print {
-                    display: none !important;
-                  }
-                }
-                * {
-                  margin: 0;
-                  padding: 0;
-                  box-sizing: border-box;
-                }
-                html {
-                  width: 58mm;
-                  max-width: 58mm;
-                  margin: 0;
-                  padding: 0;
-                }
-                body {
-                  font-family: 'Courier New', monospace;
-                  width: 58mm;
-                  max-width: 58mm;
-                  margin: 0 auto;
-                  padding: 15px 10px;
-                  color: #000;
-                  font-size: 12px;
-                  line-height: 1.3;
-                  overflow: visible;
-                }
-                .header {
-                  text-align: center;
-                  margin-bottom: 15px;
-                  padding-bottom: 10px;
-                  border-bottom: 1px dashed #000;
-                }
-                .header h1 {
-                  margin: 0;
-                  font-size: 16px;
-                  font-weight: bold;
-                  text-transform: uppercase;
-                  letter-spacing: 1px;
-                }
-                .header p {
-                  margin: 3px 0;
-                  font-size: 10px;
-                }
-                .divider {
-                  border-top: 1px dashed #000;
-                  margin: 8px 0;
-                }
-                .info-section {
-                  margin-bottom: 10px;
-                  font-size: 11px;
-                }
-                .info-row {
-                  display: flex;
-                  justify-content: space-between;
-                  margin: 3px 0;
-                  font-size: 11px;
-                }
-                .info-label {
-                  font-weight: bold;
-                }
-                .items-section {
-                  margin: 10px 0;
-                }
-                .item-row {
-                  margin: 5px 0;
-                  font-size: 11px;
-                }
-                .item-name {
-                  font-weight: bold;
-                  margin-bottom: 2px;
-                }
-                .item-details {
-                  font-size: 10px;
-                  color: #333;
-                  margin-left: 5px;
-                  margin-bottom: 2px;
-                }
-                .item-line {
-                  display: flex;
-                  justify-content: space-between;
-                  margin-top: 3px;
-                }
-                .item-qty-price {
-                  display: flex;
-                  justify-content: space-between;
-                  width: 100%;
-                }
-                .total-section {
-                  margin-top: 10px;
-                  padding-top: 8px;
-                  border-top: 2px dashed #000;
-                }
-                .total-row {
-                  display: flex;
-                  justify-content: space-between;
-                  font-size: 14px;
-                  font-weight: bold;
-                  margin: 5px 0;
-                }
-                .footer {
-                  text-align: center;
-                  margin-top: 15px;
-                  padding-top: 10px;
-                  border-top: 1px dashed #000;
-                  font-size: 10px;
-                }
-                .button-container {
-                  text-align: center;
-                  margin: 20px 0;
-                }
-                button {
-                  background-color: #bf9675;
-                  color: white;
-                  border: none;
-                  padding: 12px 24px;
-                  font-size: 14px;
-                  border-radius: 6px;
-                  cursor: pointer;
-                  font-weight: bold;
-                }
-                button:hover {
-                  background-color: #a88262;
-                }
-              </style>
-            </head>
-            <body>
-              <div class="header">
-                <h1>Joe's Cafe & Resto</h1>
-                <p>Order Receipt</p>
-              </div>
-
-              <div class="divider"></div>
-
-              <div class="info-section">
-                <div class="info-row">
-                  <span class="info-label">Order #:</span>
-                  <span>${order.id.slice(-8).toUpperCase()}</span>
-                </div>
-                <div class="info-row">
-                  <span>Date:</span>
-                  <span>${new Date(order.created_at).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}</span>
-                </div>
-                <div class="info-row">
-                  <span>Time:</span>
-                  <span>${new Date(order.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
-                </div>
-                <div class="info-row">
-                  <span>Status:</span>
-                  <span>${order.status.charAt(0).toUpperCase() + order.status.slice(1)}</span>
-                </div>
-              </div>
-
-              <div class="divider"></div>
-
-              <div class="info-section">
-                <div class="info-row">
-                  <span class="info-label">Customer:</span>
-                  <span>${order.customer_name}</span>
-                </div>
-                <div class="info-row">
-                  <span>Contact:</span>
-                  <span>${order.contact_number}</span>
-                </div>
-                <div class="info-row">
-                  <span>Service:</span>
-                  <span>${formatServiceTypeDisplay(order.service_type)}</span>
-                </div>
-                ${order.address ? `
-                <div class="info-row">
-                  <span>Address:</span>
-                  <span style="text-align: right; max-width: 60%;">${order.address}</span>
-                </div>
-                ` : ''}
-                ${order.pickup_time ? `
-                <div class="info-row">
-                  <span>Pickup:</span>
-                  <span>${order.pickup_time}</span>
-                </div>
-                ` : ''}
-                ${order.party_size ? `
-                <div class="info-row">
-                  <span>Party:</span>
-                  <span>${order.party_size} person${order.party_size !== 1 ? 's' : ''}</span>
-                </div>
-                ` : ''}
-                ${order.dine_in_time ? `
-                <div class="info-row">
-                  <span>Dine-in:</span>
-                  <span>${new Date(order.dine_in_time).toLocaleString('en-US', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
-                </div>
-                ` : ''}
-                <div class="info-row">
-                  <span>Payment:</span>
-                  <span>${order.payment_method}</span>
-                </div>
-              </div>
-
-              <div class="divider"></div>
-
-              <div class="items-section">
-                ${order.order_items.map(item => {
-                  let itemName = item.name;
-                  let itemDetails = '';
-                  if (item.variation) {
-                    itemDetails += `<div class="item-details">Size: ${item.variation.name}</div>`;
-                  }
-                  if (item.add_ons && item.add_ons.length > 0) {
-                    const addOnsList = item.add_ons.map((addon: any) => 
-                      addon.quantity > 1 ? `${addon.name} x${addon.quantity}` : addon.name
-                    ).join(', ');
-                    itemDetails += `<div class="item-details">+ ${addOnsList}</div>`;
-                  }
-                  return `
-                    <div class="item-row">
-                      <div class="item-name">${itemName}</div>
-                      ${itemDetails}
-                      <div class="item-line">
-                        <div class="item-qty-price">
-                          <span>${item.quantity}x ₱${item.unit_price.toFixed(2)}</span>
-                          <span>₱${item.subtotal.toFixed(2)}</span>
-                        </div>
-                      </div>
-                    </div>
-                  `;
-                }).join('')}
-              </div>
-
-              <div class="divider"></div>
-
-              <div class="total-section">
-                <div class="total-row">
-                  <span>TOTAL:</span>
-                  <span>₱${order.total.toFixed(2)}</span>
-                </div>
-              </div>
-
-              ${order.notes ? `
-              <div class="divider"></div>
-              <div class="info-section">
-                <div style="font-size: 10px;">
-                  <strong>Notes:</strong> ${order.notes}
-                </div>
-              </div>
-              ` : ''}
-
-              <div class="divider"></div>
-
-              <div class="footer">
-                <p>Thank you for your order!</p>
-                <p>Order #${order.id.slice(-8).toUpperCase()}</p>
-                <p style="margin-top: 5px;">${new Date().toLocaleString('en-US', { 
-                  month: 'short', 
-                  day: 'numeric',
-                  year: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}</p>
-              </div>
-
-              <div class="button-container no-print">
-                <button onclick="window.print()">Print Receipt</button>
-              </div>
-            </body>
-          </html>
-        `;
-
-        const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-        if (iframeDoc) {
-          iframeDoc.open();
-          iframeDoc.write(receiptHTML);
-          iframeDoc.close();
+        if (printWindow) {
+          // Wait for the window to load, then trigger print
+          printWindow.onload = () => {
+            setTimeout(() => {
+              printWindow.print();
+            }, 500);
+          };
           
+          // Fallback: trigger print after a delay even if onload doesn't fire
           setTimeout(() => {
-            if (iframe.contentWindow && iframe.contentDocument) {
-              // Hide parent page completely before printing
-              document.body.style.display = 'none';
-              document.documentElement.style.display = 'none';
-              document.body.style.visibility = 'hidden';
-              document.documentElement.style.visibility = 'hidden';
-              
-              // Add print event listener to hide parent page
-              const handleBeforePrint = () => {
+            if (printWindow && !printWindow.closed) {
+              printWindow.print();
+            }
+          }, 1000);
+        } else {
+          // If popup blocked, fallback to iframe
+          const originalBodyDisplay = document.body.style.display;
+          const originalHtmlDisplay = document.documentElement.style.display;
+          const originalBodyVisibility = document.body.style.visibility;
+          const originalHtmlVisibility = document.documentElement.style.visibility;
+          
+          const iframe = document.createElement('iframe');
+          iframe.setAttribute('id', 'receipt-print-iframe-desktop');
+          iframe.style.position = 'fixed';
+          iframe.style.right = '0';
+          iframe.style.bottom = '0';
+          iframe.style.width = '0';
+          iframe.style.height = '0';
+          iframe.style.border = '0';
+          iframe.style.opacity = '0';
+          iframe.style.pointerEvents = 'none';
+          iframe.style.zIndex = '999999';
+          document.body.appendChild(iframe);
+
+          const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+          if (iframeDoc) {
+            iframeDoc.open();
+            iframeDoc.write(receiptHTML);
+            iframeDoc.close();
+            
+            setTimeout(() => {
+              if (iframe.contentWindow && iframe.contentDocument) {
                 document.body.style.display = 'none';
                 document.documentElement.style.display = 'none';
                 document.body.style.visibility = 'hidden';
                 document.documentElement.style.visibility = 'hidden';
-              };
-              
-              const handleAfterPrint = () => {
-                document.body.style.display = originalBodyDisplay;
-                document.documentElement.style.display = originalHtmlDisplay;
-                document.body.style.visibility = originalBodyVisibility;
-                document.documentElement.style.visibility = originalHtmlVisibility;
+                
+                const handleAfterPrint = () => {
+                  document.body.style.display = originalBodyDisplay;
+                  document.documentElement.style.display = originalHtmlDisplay;
+                  document.body.style.visibility = originalBodyVisibility;
+                  document.documentElement.style.visibility = originalHtmlVisibility;
+                  setTimeout(() => {
+                    const iframeEl = document.getElementById('receipt-print-iframe-desktop');
+                    if (iframeEl && iframeEl.parentNode) {
+                      iframeEl.parentNode.removeChild(iframeEl);
+                    }
+                  }, 100);
+                };
+                
+                iframe.contentWindow.addEventListener('afterprint', handleAfterPrint);
+                iframe.contentWindow.focus();
+                
                 setTimeout(() => {
+                  iframe.contentWindow?.print();
+                }, 100);
+                
+                setTimeout(() => {
+                  document.body.style.display = originalBodyDisplay;
+                  document.documentElement.style.display = originalHtmlDisplay;
+                  document.body.style.visibility = originalBodyVisibility;
+                  document.documentElement.style.visibility = originalHtmlVisibility;
                   const iframeEl = document.getElementById('receipt-print-iframe-desktop');
                   if (iframeEl && iframeEl.parentNode) {
                     iframeEl.parentNode.removeChild(iframeEl);
                   }
-                }, 100);
-              };
-              
-              // Listen for print events
-              iframe.contentWindow.addEventListener('beforeprint', handleBeforePrint);
-              iframe.contentWindow.addEventListener('afterprint', handleAfterPrint);
-              
-              // Focus and print from iframe
-              iframe.contentWindow.focus();
-              
-              // Small delay to ensure parent is hidden
-              setTimeout(() => {
-                iframe.contentWindow?.print();
-              }, 100);
-              
-              // Restore parent page after printing (fallback)
-              setTimeout(() => {
-                document.body.style.display = originalBodyDisplay;
-                document.documentElement.style.display = originalHtmlDisplay;
-                document.body.style.visibility = originalBodyVisibility;
-                document.documentElement.style.visibility = originalHtmlVisibility;
-                const iframeEl = document.getElementById('receipt-print-iframe-desktop');
-                if (iframeEl && iframeEl.parentNode) {
-                  iframeEl.parentNode.removeChild(iframeEl);
-                }
-              }, 3000);
-            }
-          }, 500);
+                }, 3000);
+              }
+            }, 500);
+          }
         }
-        return;
       }
-
-      const receiptHTML = `
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <title>Receipt - Order #${orderData.id.slice(-8).toUpperCase()}</title>
-            <style>
-              @media print {
-                @page {
-                  margin: 0;
-                  size: 58mm auto;
-                }
-                html, body {
-                  margin: 0 !important;
-                  padding: 10px !important;
-                  width: 58mm !important;
-                  height: auto !important;
-                  overflow: visible !important;
-                }
-                body * {
-                  visibility: visible;
-                }
-                .no-print {
-                  display: none !important;
-                }
-              }
-              * {
-                margin: 0;
-                padding: 0;
-                box-sizing: border-box;
-              }
-              html {
-                width: 58mm;
-                max-width: 58mm;
-                margin: 0;
-                padding: 0;
-              }
-              body {
-                font-family: 'Courier New', monospace;
-                width: 58mm;
-                max-width: 58mm;
-                margin: 0 auto;
-                padding: 15px 10px;
-                color: #000;
-                font-size: 12px;
-                line-height: 1.3;
-                overflow: visible;
-              }
-              .header {
-                text-align: center;
-                margin-bottom: 15px;
-                padding-bottom: 10px;
-                border-bottom: 1px dashed #000;
-              }
-              .header h1 {
-                margin: 0;
-                font-size: 16px;
-                font-weight: bold;
-                text-transform: uppercase;
-                letter-spacing: 1px;
-              }
-              .header p {
-                margin: 3px 0;
-                font-size: 10px;
-              }
-              .divider {
-                border-top: 1px dashed #000;
-                margin: 8px 0;
-              }
-              .info-section {
-                margin-bottom: 10px;
-                font-size: 11px;
-              }
-              .info-row {
-                display: flex;
-                justify-content: space-between;
-                margin: 3px 0;
-                font-size: 11px;
-              }
-              .info-label {
-                font-weight: bold;
-              }
-              .items-section {
-                margin: 10px 0;
-              }
-              .item-row {
-                margin: 5px 0;
-                font-size: 11px;
-              }
-              .item-name {
-                font-weight: bold;
-                margin-bottom: 2px;
-              }
-              .item-details {
-                font-size: 10px;
-                color: #333;
-                margin-left: 5px;
-                margin-bottom: 2px;
-              }
-              .item-line {
-                display: flex;
-                justify-content: space-between;
-                margin-top: 3px;
-              }
-              .item-qty-price {
-                display: flex;
-                justify-content: space-between;
-                width: 100%;
-              }
-              .total-section {
-                margin-top: 10px;
-                padding-top: 8px;
-                border-top: 2px dashed #000;
-              }
-              .total-row {
-                display: flex;
-                justify-content: space-between;
-                font-size: 14px;
-                font-weight: bold;
-                margin: 5px 0;
-              }
-              .footer {
-                text-align: center;
-                margin-top: 15px;
-                padding-top: 10px;
-                border-top: 1px dashed #000;
-                font-size: 10px;
-              }
-              .button-container {
-                text-align: center;
-                margin: 20px 0;
-              }
-              button {
-                background-color: #bf9675;
-                color: white;
-                border: none;
-                padding: 12px 24px;
-                font-size: 14px;
-                border-radius: 6px;
-                cursor: pointer;
-                font-weight: bold;
-              }
-              button:hover {
-                background-color: #a88262;
-              }
-            </style>
-          </head>
-          <body>
-            <div class="header">
-              <h1>Joe's Cafe & Resto</h1>
-              <p>Order Receipt</p>
-            </div>
-
-            <div class="divider"></div>
-
-            <div class="info-section">
-              <div class="info-row">
-                <span class="info-label">Order #:</span>
-                <span>${orderData.id.slice(-8).toUpperCase()}</span>
-              </div>
-              <div class="info-row">
-                <span>Date:</span>
-                <span>${new Date(orderData.created_at).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}</span>
-              </div>
-              <div class="info-row">
-                <span>Time:</span>
-                <span>${new Date(orderData.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
-              </div>
-              <div class="info-row">
-                <span>Status:</span>
-                <span>${orderData.status.charAt(0).toUpperCase() + orderData.status.slice(1)}</span>
-              </div>
-            </div>
-
-            <div class="divider"></div>
-
-            <div class="info-section">
-              <div class="info-row">
-                <span class="info-label">Customer:</span>
-                <span>${String(orderData.customer_name || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>
-              </div>
-              <div class="info-row">
-                <span>Contact:</span>
-                <span>${String(orderData.contact_number || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>
-              </div>
-              <div class="info-row">
-                <span>Service:</span>
-                <span>${formatServiceTypeDisplay(orderData.service_type)}</span>
-              </div>
-              ${orderData.address ? `
-              <div class="info-row">
-                <span>Address:</span>
-                <span style="text-align: right; max-width: 60%;">${String(orderData.address).replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>
-              </div>
-              ` : ''}
-              ${orderData.pickup_time ? `
-              <div class="info-row">
-                <span>Pickup:</span>
-                <span>${String(orderData.pickup_time).replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>
-              </div>
-              ` : ''}
-              ${orderData.party_size ? `
-              <div class="info-row">
-                <span>Party:</span>
-                <span>${orderData.party_size} person${orderData.party_size !== 1 ? 's' : ''}</span>
-              </div>
-              ` : ''}
-              ${orderData.dine_in_time ? `
-              <div class="info-row">
-                <span>Dine-in:</span>
-                <span>${new Date(orderData.dine_in_time).toLocaleString('en-US', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
-              </div>
-              ` : ''}
-              <div class="info-row">
-                <span>Payment:</span>
-                <span>${String(orderData.payment_method || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>
-              </div>
-            </div>
-
-            <div class="divider"></div>
-
-            <div class="items-section">
-              ${orderItems.length > 0 ? orderItems.map(item => {
-                const itemName = String(item.name || 'Unknown Item').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                let itemDetails = '';
-                const variationName = getVariationName(item.variation);
-                if (variationName) {
-                  itemDetails += `<div class="item-details">Size: ${String(variationName).replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
-                }
-                const addOns = getAddOns(item.add_ons);
-                if (addOns && addOns.length > 0) {
-                  const addOnsList = addOns.map((addon: any) => {
-                    const addonName = String(addon.name || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                    return addon.quantity > 1 ? `${addonName} x${addon.quantity}` : addonName;
-                  }).join(', ');
-                  itemDetails += `<div class="item-details">+ ${addOnsList}</div>`;
-                }
-                const quantity = Number(item.quantity) || 1;
-                const unitPrice = Number(item.unit_price) || 0;
-                const subtotal = Number(item.subtotal) || (unitPrice * quantity);
-                return `
-                  <div class="item-row">
-                    <div class="item-name">${itemName}</div>
-                    ${itemDetails}
-                    <div class="item-line">
-                      <div class="item-qty-price">
-                        <span>${quantity}x ₱${unitPrice.toFixed(2)}</span>
-                        <span>₱${subtotal.toFixed(2)}</span>
-                      </div>
-                    </div>
-                  </div>
-                `;
-              }).join('') : '<div class="item-row"><div class="item-name">No items found</div></div>'}
-            </div>
-
-            <div class="divider"></div>
-
-            <div class="total-section">
-              <div class="total-row">
-                <span>TOTAL:</span>
-                <span>₱${orderData.total.toFixed(2)}</span>
-              </div>
-            </div>
-
-            ${orderData.notes ? `
-            <div class="divider"></div>
-            <div class="info-section">
-              <div style="font-size: 10px;">
-                <strong>Notes:</strong> ${String(orderData.notes).replace(/</g, '&lt;').replace(/>/g, '&gt;')}
-              </div>
-            </div>
-            ` : ''}
-
-            <div class="divider"></div>
-
-            <div class="footer">
-              <p>Thank you for your order!</p>
-              <p>Order #${orderData.id.slice(-8).toUpperCase()}</p>
-              <p style="margin-top: 5px;">${new Date().toLocaleString('en-US', { 
-                month: 'short', 
-                day: 'numeric',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-              })}</p>
-            </div>
-
-            <div class="button-container no-print">
-              <button onclick="window.print()">Print Receipt</button>
-            </div>
-          </body>
-        </html>
-      `;
-
-      printWindow.document.write(receiptHTML);
-      printWindow.document.close();
-      
-      // Wait for content to load, then trigger print
-      setTimeout(() => {
-        printWindow.print();
-      }, 250);
+    } catch (error) {
+      console.error('Error printing receipt:', error);
+      alert('An error occurred while trying to print the receipt. Please try again.');
     }
   };
 
