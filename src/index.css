@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -12,43 +14,16 @@
   font-display: swap;
 }
 
-@font-face {
-  font-family: 'Funnel Sans';
-  src: url('/fonts/FunnelSans-Medium.woff2') format('woff2'),
-       url('/fonts/FunnelSans-Medium.woff') format('woff');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Funnel Sans';
-  src: url('/fonts/FunnelSans-SemiBold.woff2') format('woff2'),
-       url('/fonts/FunnelSans-SemiBold.woff') format('woff');
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Funnel Sans';
-  src: url('/fonts/FunnelSans-Bold.woff2') format('woff2'),
-       url('/fonts/FunnelSans-Bold.woff') format('woff');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
 /* Modern Cafe Custom Styles */
 body {
-  background-color: #ffffff;
-  color: #1f2937;
+  background-color: #fcfcfc;
+  color: #092950;
   font-family: 'Inter', sans-serif;
 }
 
-/* Headings use Funnel Sans */
+/* Headings use Playfair Display */
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Funnel Sans', sans-serif;
+  font-family: 'Playfair Display', serif;
 }
 
 /* Hide scrollbar for mobile nav */

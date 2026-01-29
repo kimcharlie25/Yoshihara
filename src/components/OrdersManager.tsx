@@ -15,11 +15,11 @@ interface PasswordVerificationModalProps {
   orderNumber: string;
 }
 
-const PasswordVerificationModal: React.FC<PasswordVerificationModalProps> = ({ 
-  isOpen, 
-  onClose, 
-  onVerify, 
-  orderNumber 
+const PasswordVerificationModal: React.FC<PasswordVerificationModalProps> = ({
+  isOpen,
+  onClose,
+  onVerify,
+  orderNumber
 }) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -270,15 +270,15 @@ const OrdersManager: React.FC<OrdersManagerProps> = ({ onBack }) => {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    
+
     // Apply status filter
     let statusFiltered = statusFilter === 'all' ? orders : orders.filter(o => o.status.toLowerCase() === statusFilter);
-    
+
     // Apply service type filter
-    let serviceFiltered = serviceTypeFilter === 'all' 
-      ? statusFiltered 
+    let serviceFiltered = serviceTypeFilter === 'all'
+      ? statusFiltered
       : statusFiltered.filter(o => o.service_type === serviceTypeFilter);
-    
+
     // Apply date filters
     let dateFiltered = serviceFiltered;
     if (dateFrom) {
@@ -291,15 +291,15 @@ const OrdersManager: React.FC<OrdersManagerProps> = ({ onBack }) => {
       toDate.setHours(23, 59, 59, 999);
       dateFiltered = dateFiltered.filter(o => new Date(o.created_at) <= toDate);
     }
-    
+
     const searched = q.length === 0
       ? dateFiltered
       : dateFiltered.filter(o =>
-          o.customer_name.toLowerCase().includes(q) ||
-          o.contact_number.toLowerCase().includes(q) ||
-          o.id.toLowerCase().includes(q) ||
-          (o.address || '').toLowerCase().includes(q)
-        );
+        o.customer_name.toLowerCase().includes(q) ||
+        o.contact_number.toLowerCase().includes(q) ||
+        o.id.toLowerCase().includes(q) ||
+        (o.address || '').toLowerCase().includes(q)
+      );
     const sorted = [...searched].sort((a, b) => {
       const dir = sortDir === 'asc' ? 1 : -1;
       switch (sortKey) {
@@ -331,7 +331,7 @@ const OrdersManager: React.FC<OrdersManagerProps> = ({ onBack }) => {
     try {
       // Filter completed orders only
       const completedOrders = filtered.filter(o => o.status.toLowerCase() === 'completed');
-      
+
       if (completedOrders.length === 0) {
         alert('No completed orders to export.');
         setExporting(false);
@@ -374,16 +374,16 @@ const OrdersManager: React.FC<OrdersManagerProps> = ({ onBack }) => {
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
-      
+
       const dateStr = new Date().toISOString().split('T')[0];
       link.setAttribute('href', url);
       link.setAttribute('download', `completed_orders_${dateStr}.csv`);
       link.style.visibility = 'hidden';
-      
+
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
+
       alert(`Successfully exported ${completedOrders.length} completed order(s)!`);
     } catch (error) {
       console.error('Export error:', error);
@@ -404,8 +404,8 @@ const OrdersManager: React.FC<OrdersManagerProps> = ({ onBack }) => {
     if (!printWindow) return;
 
     const formatServiceTypeDisplay = (serviceType: string) => {
-      return serviceType === 'over-the-counter' 
-        ? 'Over the Counter' 
+      return serviceType === 'over-the-counter'
+        ? 'Over the Counter'
         : serviceType.charAt(0).toUpperCase() + serviceType.slice(1).replace(/-/g, ' ');
     };
 
@@ -529,24 +529,27 @@ const OrdersManager: React.FC<OrdersManagerProps> = ({ onBack }) => {
               margin: 20px 0;
             }
             button {
-              background-color: #bf9675;
-              color: white;
-              border: none;
+              background-color: #092950;
+              color: #d4af37;
+              border: 1px solid #d4af37;
               padding: 12px 24px;
               font-size: 14px;
-              border-radius: 6px;
+              border-radius: 2px;
               cursor: pointer;
               font-weight: bold;
+              text-transform: uppercase;
+              letter-spacing: 1px;
             }
             button:hover {
-              background-color: #a88262;
+              background-color: #0d3b73;
             }
           </style>
         </head>
         <body>
           <div class="header">
-            <h1>Joe's Cafe & Resto</h1>
-            <p>Order Receipt</p>
+            <h1 style="color: #092950;">Yoshihara Japanese Dining</h1>
+            <p style="color: #d4af37; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; font-size: 8px;">Premium Culinary Experience</p>
+            <p>Official Order Receipt</p>
           </div>
 
           <div class="divider"></div>
@@ -619,18 +622,18 @@ const OrdersManager: React.FC<OrdersManagerProps> = ({ onBack }) => {
 
           <div class="items-section">
             ${order.order_items.map(item => {
-              let itemName = item.name;
-              let itemDetails = '';
-              if (item.variation) {
-                itemDetails += `<div class="item-details">Size: ${item.variation.name}</div>`;
-              }
-              if (item.add_ons && item.add_ons.length > 0) {
-                const addOnsList = item.add_ons.map((addon: any) => 
-                  addon.quantity > 1 ? `${addon.name} x${addon.quantity}` : addon.name
-                ).join(', ');
-                itemDetails += `<div class="item-details">+ ${addOnsList}</div>`;
-              }
-              return `
+      let itemName = item.name;
+      let itemDetails = '';
+      if (item.variation) {
+        itemDetails += `<div class="item-details">Size: ${item.variation.name}</div>`;
+      }
+      if (item.add_ons && item.add_ons.length > 0) {
+        const addOnsList = item.add_ons.map((addon: any) =>
+          addon.quantity > 1 ? `${addon.name} x${addon.quantity}` : addon.name
+        ).join(', ');
+        itemDetails += `<div class="item-details">+ ${addOnsList}</div>`;
+      }
+      return `
                 <div class="item-row">
                   <div class="item-name">${itemName}</div>
                   ${itemDetails}
@@ -642,7 +645,7 @@ const OrdersManager: React.FC<OrdersManagerProps> = ({ onBack }) => {
                   </div>
                 </div>
               `;
-            }).join('')}
+    }).join('')}
           </div>
 
           <div class="divider"></div>
@@ -668,13 +671,13 @@ const OrdersManager: React.FC<OrdersManagerProps> = ({ onBack }) => {
           <div class="footer">
             <p>Thank you for your order!</p>
             <p>Order #${order.id.slice(-8).toUpperCase()}</p>
-            <p style="margin-top: 5px;">${new Date().toLocaleString('en-US', { 
-              month: 'short', 
-              day: 'numeric',
-              year: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit'
-            })}</p>
+            <p style="margin-top: 5px;">${new Date().toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })}</p>
           </div>
 
           <div class="button-container no-print">
@@ -686,7 +689,7 @@ const OrdersManager: React.FC<OrdersManagerProps> = ({ onBack }) => {
 
     printWindow.document.write(receiptHTML);
     printWindow.document.close();
-    
+
     // Wait for content to load, then trigger print
     setTimeout(() => {
       printWindow.print();
@@ -747,7 +750,7 @@ const OrdersManager: React.FC<OrdersManagerProps> = ({ onBack }) => {
                 <ArrowLeft className="h-5 w-5" />
                 <span>Back to Dashboard</span>
               </button>
-              <h1 className="text-2xl font-playfair font-semibold text-black">Orders Management</h1>
+              <h1 className="text-3xl font-playfair font-bold text-primary-900 tracking-tight">Order Management</h1>
             </div>
             <div className="text-sm text-gray-500">
               {orders.length} order{orders.length !== 1 ? 's' : ''} total
@@ -799,17 +802,17 @@ const OrdersManager: React.FC<OrdersManagerProps> = ({ onBack }) => {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => toggleSort('created_at')}
-                    className={`px-3 py-2 rounded-lg border text-sm flex items-center gap-1 ${sortKey==='created_at' ? 'border-blue-500 text-blue-700 bg-blue-50' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}
+                    className={`px-3 py-2 rounded-lg border text-sm flex items-center gap-1 ${sortKey === 'created_at' ? 'border-blue-500 text-blue-700 bg-blue-50' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}
                   >
                     Date
-                    <ChevronDown className={`h-4 w-4 transition-transform ${sortKey==='created_at' && sortDir==='asc' ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`h-4 w-4 transition-transform ${sortKey === 'created_at' && sortDir === 'asc' ? 'rotate-180' : ''}`} />
                   </button>
                   <button
                     onClick={() => toggleSort('total')}
-                    className={`px-3 py-2 rounded-lg border text-sm flex items-center gap-1 ${sortKey==='total' ? 'border-blue-500 text-blue-700 bg-blue-50' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}
+                    className={`px-3 py-2 rounded-lg border text-sm flex items-center gap-1 ${sortKey === 'total' ? 'border-blue-500 text-blue-700 bg-blue-50' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}
                   >
                     Total
-                    <ChevronDown className={`h-4 w-4 transition-transform ${sortKey==='total' && sortDir==='asc' ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`h-4 w-4 transition-transform ${sortKey === 'total' && sortDir === 'asc' ? 'rotate-180' : ''}`} />
                   </button>
                 </div>
               </div>
@@ -848,7 +851,7 @@ const OrdersManager: React.FC<OrdersManagerProps> = ({ onBack }) => {
                   )}
                 </div>
               </div>
-              
+
               <button
                 onClick={exportToCSV}
                 disabled={exporting || filtered.filter(o => o.status.toLowerCase() === 'completed').length === 0}
@@ -862,7 +865,7 @@ const OrdersManager: React.FC<OrdersManagerProps> = ({ onBack }) => {
             {/* Results count */}
             {(dateFrom || dateTo) && (
               <div className="text-sm text-gray-600">
-                Showing {filtered.length} order{filtered.length !== 1 ? 's' : ''} 
+                Showing {filtered.length} order{filtered.length !== 1 ? 's' : ''}
                 {dateFrom && ` from ${new Date(dateFrom).toLocaleDateString()}`}
                 {dateTo && ` to ${new Date(dateTo).toLocaleDateString()}`}
               </div>
@@ -1122,7 +1125,7 @@ const OrdersManager: React.FC<OrdersManagerProps> = ({ onBack }) => {
                     <p><strong>Order Date:</strong> {formatDateTime(selectedOrder.created_at)}</p>
                   </div>
                 </div>
-                
+
                 <div>
                   <h4 className="font-semibold text-gray-900 mb-3">Order Details</h4>
                   <div className="space-y-2 text-sm">
@@ -1179,7 +1182,7 @@ const OrdersManager: React.FC<OrdersManagerProps> = ({ onBack }) => {
                           )}
                           {item.add_ons && item.add_ons.length > 0 && (
                             <div className="text-sm text-gray-600 mt-1">
-                              Add-ons: {item.add_ons.map((addon: any) => 
+                              Add-ons: {item.add_ons.map((addon: any) =>
                                 addon.quantity > 1 ? `${addon.name} x${addon.quantity}` : addon.name
                               ).join(', ')}
                             </div>

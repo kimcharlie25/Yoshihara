@@ -441,7 +441,7 @@ if (/rate limit/i.test(error) || /missing identifiers/i.test(error)) {
 
 **Generated Order Summary:**
 ```
-🛒 Joe's Cafe & Resto ORDER
+🛒 Yoshihara Japanese Dining & Grocery ORDER
 
 👤 Customer: John Doe
 📞 Contact: 09123456789

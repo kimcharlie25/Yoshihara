@@ -91,7 +91,7 @@ const OrderTracking: React.FC<OrderTrackingProps> = ({ onBack }) => {
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!searchValue.trim()) {
       setError('Please enter a search value');
       return;
@@ -120,13 +120,13 @@ const OrderTracking: React.FC<OrderTrackingProps> = ({ onBack }) => {
             .limit(100);
 
           if (fetchError) throw fetchError;
-          
+
           const searchValueUpper = searchValue.trim().toUpperCase();
-          const matchingOrder = data?.find(order => 
+          const matchingOrder = data?.find(order =>
             order.id.slice(-8).toUpperCase().includes(searchValueUpper) ||
             order.id.toUpperCase().includes(searchValueUpper)
           );
-          
+
           if (matchingOrder) {
             setOrder(matchingOrder as OrderWithItems);
           } else {
@@ -161,7 +161,7 @@ const OrderTracking: React.FC<OrderTrackingProps> = ({ onBack }) => {
           .limit(1);
 
         if (fetchError) throw fetchError;
-        
+
         if (data && data.length > 0) {
           setOrder(data[0] as OrderWithItems);
         } else {
@@ -191,13 +191,12 @@ const OrderTracking: React.FC<OrderTrackingProps> = ({ onBack }) => {
             <div className="flex items-center space-x-2 sm:space-x-4">
               <button
                 onClick={onBack}
-                className="flex items-center space-x-2 text-gray-600 hover:text-primary-600 transition-colors duration-200 text-sm sm:text-base"
+                className="flex items-center space-x-2 text-primary-600 hover:text-primary-900 transition-colors duration-200 group"
               >
-                <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
-                <span className="hidden sm:inline">Back to Menu</span>
-                <span className="sm:hidden">Back</span>
+                <ArrowLeft className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
+                <span className="font-semibold tracking-widest uppercase text-xs">Back to Menu</span>
               </button>
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-funnel font-semibold text-gray-900">Track Your Order</h1>
+              <h1 className="text-3xl font-playfair font-bold text-primary-900 ml-8">Track Your Order</h1>
             </div>
           </div>
         </div>
@@ -207,8 +206,8 @@ const OrderTracking: React.FC<OrderTrackingProps> = ({ onBack }) => {
         {/* Search Section */}
         <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-6 border border-gray-200">
           <div className="flex items-center gap-2 mb-4">
-            <Search className="h-4 w-4 sm:h-5 sm:w-5 text-primary-600" />
-            <h2 className="text-lg sm:text-xl md:text-2xl font-funnel font-semibold text-gray-900">Search Order</h2>
+            <Search className="h-5 w-5 text-accent-600" />
+            <h2 className="text-2xl font-playfair font-bold text-primary-900">Search Order</h2>
           </div>
 
           <form onSubmit={handleSearch} className="space-y-4">
@@ -217,22 +216,20 @@ const OrderTracking: React.FC<OrderTrackingProps> = ({ onBack }) => {
               <button
                 type="button"
                 onClick={() => setSearchType('orderId')}
-                className={`flex-1 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border-2 transition-all text-sm sm:text-base font-medium ${
-                  searchType === 'orderId'
-                    ? 'border-primary-600 bg-primary-50 text-primary-700'
-                    : 'border-gray-300 text-gray-700 hover:border-primary-300 bg-white'
-                }`}
+                className={`flex-1 px-4 py-3 rounded-sm border transition-all duration-300 font-bold tracking-widest uppercase text-[10px] sm:text-xs ${searchType === 'orderId'
+                    ? 'border-accent-500 bg-primary-900 text-accent-400 shadow-md'
+                    : 'border-primary-100 text-primary-800 hover:border-primary-300 bg-white'
+                  }`}
               >
                 Order ID
               </button>
               <button
                 type="button"
                 onClick={() => setSearchType('phone')}
-                className={`flex-1 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border-2 transition-all text-sm sm:text-base font-medium ${
-                  searchType === 'phone'
-                    ? 'border-primary-600 bg-primary-50 text-primary-700'
-                    : 'border-gray-300 text-gray-700 hover:border-primary-300 bg-white'
-                }`}
+                className={`flex-1 px-4 py-3 rounded-sm border transition-all duration-300 font-bold tracking-widest uppercase text-[10px] sm:text-xs ${searchType === 'phone'
+                    ? 'border-accent-500 bg-primary-900 text-accent-400 shadow-md'
+                    : 'border-primary-100 text-primary-800 hover:border-primary-300 bg-white'
+                  }`}
               >
                 Phone Number
               </button>
@@ -251,7 +248,7 @@ const OrderTracking: React.FC<OrderTrackingProps> = ({ onBack }) => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full sm:w-auto px-6 sm:px-8 py-2.5 sm:py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed font-medium text-sm sm:text-base font-sans"
+                className="w-full sm:w-auto px-10 py-3 bg-primary-900 text-accent-400 rounded-sm hover:bg-primary-850 transition-all duration-300 disabled:bg-primary-50 disabled:text-primary-200 font-bold tracking-widest uppercase text-xs shadow-xl active:scale-95"
               >
                 {loading ? 'Searching...' : 'Search'}
               </button>
@@ -381,7 +378,7 @@ const OrderTracking: React.FC<OrderTrackingProps> = ({ onBack }) => {
                       )}
                       {item.add_ons && item.add_ons.length > 0 && (
                         <p className="text-xs sm:text-sm text-gray-600 font-sans mt-1 break-words">
-                          Add-ons: {item.add_ons.map((addon: any) => 
+                          Add-ons: {item.add_ons.map((addon: any) =>
                             addon.quantity > 1 ? `${addon.name} x${addon.quantity}` : addon.name
                           ).join(', ')}
                         </p>

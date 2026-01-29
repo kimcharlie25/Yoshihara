@@ -98,7 +98,7 @@ const Checkout: React.FC<CheckoutProps> = ({ cartItems, totalPrice, onBack }) =>
 
         // Compress image before upload
         const compressedFile = await compressImage(receiptFile, 1200, 0.8);
-        
+
         // Upload to Cloudinary
         uploadedReceiptUrl = await uploadReceiptToCloudinary(compressedFile);
         setReceiptUrl(uploadedReceiptUrl);
@@ -149,23 +149,23 @@ const Checkout: React.FC<CheckoutProps> = ({ cartItems, totalPrice, onBack }) =>
       }
       return;
     }
-    const timeInfo = serviceType === 'pickup' 
+    const timeInfo = serviceType === 'pickup'
       ? (pickupTime === 'custom' ? customTime : `${pickupTime} minutes`)
       : '';
-    
-    const dineInInfo = serviceType === 'dine-in' 
-      ? `👥 Party Size: ${partySize} person${partySize !== 1 ? 's' : ''}\n🕐 Preferred Time: ${new Date(dineInTime).toLocaleString('en-US', { 
-          weekday: 'long', 
-          year: 'numeric', 
-          month: 'long', 
-          day: 'numeric', 
-          hour: '2-digit', 
-          minute: '2-digit' 
-        })}`
+
+    const dineInInfo = serviceType === 'dine-in'
+      ? `👥 Party Size: ${partySize} person${partySize !== 1 ? 's' : ''}\n🕐 Preferred Time: ${new Date(dineInTime).toLocaleString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })}`
       : '';
-    
+
     const orderDetails = `
-🛒 Joe's Cafe & Resto ORDER
+🛒 Yoshihara Japanese Dining & Grocery ORDER
 📋 Order Code: #${orderId.slice(-8).toUpperCase()}
 
 👤 Customer: ${customerName}
@@ -178,20 +178,20 @@ ${serviceType === 'dine-in' ? dineInInfo : ''}
 
 📋 ORDER DETAILS:
 ${cartItems.map(item => {
-  let itemDetails = `• ${item.name}`;
-  if (item.selectedVariation) {
-    itemDetails += ` (${item.selectedVariation.name})`;
-  }
-  if (item.selectedAddOns && item.selectedAddOns.length > 0) {
-    itemDetails += ` + ${item.selectedAddOns.map(addOn => 
-      addOn.quantity && addOn.quantity > 1 
-        ? `${addOn.name} x${addOn.quantity}`
-        : addOn.name
-    ).join(', ')}`;
-  }
-  itemDetails += ` x${item.quantity} - ₱${item.totalPrice * item.quantity}`;
-  return itemDetails;
-}).join('\n')}
+      let itemDetails = `• ${item.name}`;
+      if (item.selectedVariation) {
+        itemDetails += ` (${item.selectedVariation.name})`;
+      }
+      if (item.selectedAddOns && item.selectedAddOns.length > 0) {
+        itemDetails += ` + ${item.selectedAddOns.map(addOn =>
+          addOn.quantity && addOn.quantity > 1
+            ? `${addOn.name} x${addOn.quantity}`
+            : addOn.name
+        ).join(', ')}`;
+      }
+      itemDetails += ` x${item.quantity} - ₱${item.totalPrice * item.quantity}`;
+      return itemDetails;
+    }).join('\n')}
 
 💰 TOTAL: ₱${totalPrice}
 ${serviceType === 'delivery' ? `🛵 DELIVERY FEE:` : ''}
@@ -201,12 +201,12 @@ ${uploadedReceiptUrl ? `📸 Payment Receipt: ${uploadedReceiptUrl}` : '📸 Pay
 
 ${notes ? `📝 Notes: ${notes}` : ''}
 
-Please confirm this order to proceed. Thank you for choosing Joe's Cafe & Resto! 
+Please confirm this order to proceed. Thank you for choosing Yoshihara Japanese Dining! 
 
 📋 Order Code: #${orderId.slice(-8).toUpperCase()}
     `.trim();
 
-    const pageId = '61563361921652';
+    const pageId = 'yoshihara.rpr';
     const encodedMessage = encodeURIComponent(orderDetails);
     const webLink = `https://m.me/${pageId}?text=${encodedMessage}`;
 
@@ -216,11 +216,11 @@ Please confirm this order to proceed. Thank you for choosing Joe's Cafe & Resto!
     // Use window.location for both mobile and desktop to avoid popup blocker
     // This will navigate away from the site but ensures the link always works
     window.location.href = webLink;
-    
+
   };
 
-  const isDetailsValid = customerName && contactNumber && 
-    (serviceType !== 'delivery' || address) && 
+  const isDetailsValid = customerName && contactNumber &&
+    (serviceType !== 'delivery' || address) &&
     (serviceType !== 'pickup' || (pickupTime !== 'custom' || customTime)) &&
     (serviceType !== 'dine-in' || (partySize > 0 && dineInTime));
 
@@ -230,19 +230,19 @@ Please confirm this order to proceed. Thank you for choosing Joe's Cafe & Resto!
         <div className="flex items-center mb-8">
           <button
             onClick={onBack}
-            className="flex items-center space-x-2 text-gray-600 hover:text-black transition-colors duration-200"
+            className="flex items-center space-x-2 text-primary-600 hover:text-primary-900 transition-colors duration-200 group"
           >
-            <ArrowLeft className="h-5 w-5" />
-            <span>Back to Cart</span>
+            <ArrowLeft className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
+            <span className="font-semibold tracking-widest uppercase text-xs">Back to Cart</span>
           </button>
-          <h1 className="text-2xl sm:text-3xl font-funnel font-semibold text-gray-900 ml-4 sm:ml-8">Order Details</h1>
+          <h1 className="text-3xl font-playfair font-bold text-primary-900 ml-8">Order Details</h1>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Order Summary */}
           <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-gray-100">
             <h2 className="text-xl sm:text-2xl font-funnel font-semibold text-gray-900 mb-4 sm:mb-6">Order Summary</h2>
-            
+
             <div className="space-y-4 mb-4 sm:mb-6">
               {cartItems.map((item) => (
                 <div key={item.id} className="flex items-center justify-between py-2 border-b border-primary-100">
@@ -262,11 +262,11 @@ Please confirm this order to proceed. Thank you for choosing Joe's Cafe & Resto!
                 </div>
               ))}
             </div>
-            
-            <div className="border-t border-primary-200 pt-4">
-              <div className="flex items-center justify-between text-xl sm:text-2xl font-funnel font-semibold text-gray-900">
-                <span>Total:</span>
-                <span className="text-primary-600">₱{totalPrice}</span>
+
+            <div className="border-t border-primary-200 pt-6">
+              <div className="flex items-center justify-between text-2xl font-playfair font-bold text-primary-900">
+                <span>Total Amount</span>
+                <span className="text-accent-600">₱{totalPrice}</span>
               </div>
             </div>
           </div>
@@ -274,7 +274,7 @@ Please confirm this order to proceed. Thank you for choosing Joe's Cafe & Resto!
           {/* Customer Details Form */}
           <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-gray-100">
             <h2 className="text-xl sm:text-2xl font-funnel font-semibold text-gray-900 mb-4 sm:mb-6">Customer Information</h2>
-            
+
             <form className="space-y-6">
               {/* Customer Information */}
               <div>
@@ -314,11 +314,10 @@ Please confirm this order to proceed. Thank you for choosing Joe's Cafe & Resto!
                       key={option.value}
                       type="button"
                       onClick={() => setServiceType(option.value as ServiceType)}
-                      className={`p-3 sm:p-4 rounded-lg border-2 transition-all duration-200 ${
-                        serviceType === option.value
-                          ? 'border-primary-600 bg-primary-600 text-white'
-                          : 'border-primary-300 bg-white text-gray-700 hover:border-primary-400'
-                      }`}
+                      className={`p-3 sm:p-4 rounded-lg border-2 transition-all duration-200 ${serviceType === option.value
+                        ? 'border-primary-600 bg-primary-600 text-white'
+                        : 'border-primary-300 bg-white text-gray-700 hover:border-primary-400'
+                        }`}
                     >
                       <div className="text-2xl mb-1">{option.icon}</div>
                       <div className="text-sm font-medium">{option.label}</div>
@@ -382,18 +381,17 @@ Please confirm this order to proceed. Thank you for choosing Joe's Cafe & Resto!
                           key={option.value}
                           type="button"
                           onClick={() => setPickupTime(option.value)}
-                          className={`p-3 rounded-lg border-2 transition-all duration-200 text-xs sm:text-sm ${
-                            pickupTime === option.value
-                              ? 'border-primary-600 bg-primary-600 text-white'
-                              : 'border-primary-300 bg-white text-gray-700 hover:border-primary-400'
-                          }`}
+                          className={`p-3 rounded-lg border-2 transition-all duration-200 text-xs sm:text-sm ${pickupTime === option.value
+                            ? 'border-primary-600 bg-primary-600 text-white'
+                            : 'border-primary-300 bg-white text-gray-700 hover:border-primary-400'
+                            }`}
                         >
                           <Clock className="h-4 w-4 mx-auto mb-1" />
                           {option.label}
                         </button>
                       ))}
                     </div>
-                    
+
                     {pickupTime === 'custom' && (
                       <input
                         type="text"
@@ -422,7 +420,7 @@ Please confirm this order to proceed. Thank you for choosing Joe's Cafe & Resto!
                       required
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-black mb-2">Landmark</label>
                     <input
@@ -451,11 +449,10 @@ Please confirm this order to proceed. Thank you for choosing Joe's Cafe & Resto!
               <button
                 onClick={handleProceedToPayment}
                 disabled={!isDetailsValid}
-                className={`w-full py-3 sm:py-4 rounded-xl font-semibold text-base sm:text-lg transition-all duration-200 transform ${
-                  isDetailsValid
-                    ? 'bg-primary-600 text-white hover:bg-primary-700 hover:scale-[1.02]'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
+                className={`w-full py-4 rounded-sm font-bold tracking-[0.2em] uppercase text-sm transition-all duration-300 transform shadow-xl ${isDetailsValid
+                  ? 'bg-primary-900 text-accent-400 hover:bg-primary-850 active:scale-95'
+                  : 'bg-primary-50 text-primary-200 cursor-not-allowed'
+                  }`}
               >
                 Proceed to Payment
               </button>
@@ -472,12 +469,12 @@ Please confirm this order to proceed. Thank you for choosing Joe's Cafe & Resto!
       <div className="flex items-center mb-8">
         <button
           onClick={() => setStep('details')}
-          className="flex items-center space-x-2 text-gray-600 hover:text-black transition-colors duration-200"
+          className="flex items-center space-x-2 text-primary-600 hover:text-primary-900 transition-colors duration-200 group"
         >
-          <ArrowLeft className="h-5 w-5" />
-          <span>Back to Details</span>
+          <ArrowLeft className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
+          <span className="font-semibold tracking-widest uppercase text-xs">Back to Details</span>
         </button>
-        <h1 className="text-2xl sm:text-3xl font-funnel font-semibold text-gray-900 ml-4 sm:ml-8">Payment</h1>
+        <h1 className="text-3xl font-playfair font-bold text-primary-900 ml-8">Payment</h1>
       </div>
 
       {uiNotice && (
@@ -490,18 +487,17 @@ Please confirm this order to proceed. Thank you for choosing Joe's Cafe & Resto!
         {/* Payment Method Selection */}
         <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-gray-100">
           <h2 className="text-xl sm:text-2xl font-funnel font-semibold text-gray-900 mb-4 sm:mb-6">Choose Payment Method</h2>
-          
+
           <div className="grid grid-cols-1 gap-4 mb-4 sm:mb-6">
             {paymentMethods.map((method) => (
               <button
                 key={method.id}
                 type="button"
                 onClick={() => setPaymentMethod(method.id as PaymentMethod)}
-                className={`p-3 sm:p-4 rounded-lg border-2 transition-all duration-200 flex items-center space-x-3 ${
-                  paymentMethod === method.id
-                    ? 'border-primary-600 bg-primary-600 text-white'
-                    : 'border-primary-300 bg-white text-gray-700 hover:border-primary-400'
-                }`}
+                className={`p-4 rounded-sm border transition-all duration-300 flex items-center space-x-4 shadow-sm ${paymentMethod === method.id
+                  ? 'border-accent-500 bg-primary-900 text-accent-400'
+                  : 'border-primary-100 bg-white text-primary-800 hover:border-primary-300 hover:bg-primary-50'
+                  }`}
               >
                 <span className="text-2xl">💳</span>
                 <span className="font-medium">{method.name}</span>
@@ -521,8 +517,8 @@ Please confirm this order to proceed. Thank you for choosing Joe's Cafe & Resto!
                   <p className="text-xl font-semibold text-black">Amount: ₱{totalPrice}</p>
                 </div>
                 <div className="flex-shrink-0">
-                  <img 
-                    src={selectedPaymentMethod.qr_code_url} 
+                  <img
+                    src={selectedPaymentMethod.qr_code_url}
                     alt={`${selectedPaymentMethod.name} QR Code`}
                     className="w-28 h-28 sm:w-32 sm:h-32 rounded-lg border-2 border-primary-300 shadow-sm"
                     onError={(e) => {
@@ -538,7 +534,7 @@ Please confirm this order to proceed. Thank you for choosing Joe's Cafe & Resto!
           {/* Receipt Upload */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <h4 className="font-medium text-black mb-3">📸 Upload Payment Receipt</h4>
-            
+
             {!receiptPreview ? (
               <div>
                 <label
@@ -596,7 +592,7 @@ Please confirm this order to proceed. Thank you for choosing Joe's Cafe & Resto!
                 )}
               </div>
             )}
-            
+
             <p className="text-xs text-gray-600 mt-3">
               {receiptFile ? 'Receipt will be uploaded automatically when you place your order.' : 'You can also attach your receipt in the Messenger conversation.'}
             </p>
@@ -606,7 +602,7 @@ Please confirm this order to proceed. Thank you for choosing Joe's Cafe & Resto!
         {/* Order Summary */}
         <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-gray-100">
           <h2 className="text-xl sm:text-2xl font-funnel font-semibold text-gray-900 mb-4 sm:mb-6">Final Order Summary</h2>
-          
+
           <div className="space-y-4 mb-6">
             <div className="bg-primary-50 rounded-lg p-3 sm:p-4">
               <h4 className="text-sm sm:text-base font-sans font-semibold text-gray-900 mb-2">Customer Details</h4>
@@ -630,13 +626,13 @@ Please confirm this order to proceed. Thank you for choosing Joe's Cafe & Resto!
                     Party Size: {partySize} person{partySize !== 1 ? 's' : ''}
                   </p>
                   <p className="text-sm text-gray-600">
-                    Preferred Time: {dineInTime ? new Date(dineInTime).toLocaleString('en-US', { 
-                      weekday: 'long', 
-                      year: 'numeric', 
-                      month: 'long', 
-                      day: 'numeric', 
-                      hour: '2-digit', 
-                      minute: '2-digit' 
+                    Preferred Time: {dineInTime ? new Date(dineInTime).toLocaleString('en-US', {
+                      weekday: 'long',
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
                     }) : 'Not selected'}
                   </p>
                 </>
@@ -644,55 +640,55 @@ Please confirm this order to proceed. Thank you for choosing Joe's Cafe & Resto!
             </div>
 
             {cartItems.map((item) => (
-                <div key={item.id} className="flex items-center justify-between py-2 border-b border-primary-100">
-                  <div>
-                    <h4 className="text-sm sm:text-base font-sans font-medium text-gray-900">{item.name}</h4>
+              <div key={item.id} className="flex items-center justify-between py-2 border-b border-primary-100">
+                <div>
+                  <h4 className="text-sm sm:text-base font-sans font-medium text-gray-900">{item.name}</h4>
                   {item.selectedVariation && (
                     <p className="text-xs sm:text-sm text-gray-600">Size: {item.selectedVariation.name}</p>
                   )}
                   {item.selectedAddOns && item.selectedAddOns.length > 0 && (
                     <p className="text-xs sm:text-sm text-gray-600">
-                      Add-ons: {item.selectedAddOns.map(addOn => 
-                        addOn.quantity && addOn.quantity > 1 
+                      Add-ons: {item.selectedAddOns.map(addOn =>
+                        addOn.quantity && addOn.quantity > 1
                           ? `${addOn.name} x${addOn.quantity}`
                           : addOn.name
                       ).join(', ')}
                     </p>
                   )}
-                    <p className="text-xs sm:text-sm text-gray-600">₱{item.totalPrice} x {item.quantity}</p>
-                  </div>
-                  <span className="text-sm sm:text-base font-semibold text-gray-900">₱{item.totalPrice * item.quantity}</span>
+                  <p className="text-xs sm:text-sm text-gray-600">₱{item.totalPrice} x {item.quantity}</p>
+                </div>
+                <span className="text-sm sm:text-base font-semibold text-gray-900">₱{item.totalPrice * item.quantity}</span>
               </div>
             ))}
           </div>
-          
-          <div className="border-t border-primary-200 pt-4 mb-4 sm:mb-6">
-            <div className="flex items-center justify-between text-xl sm:text-2xl font-funnel font-semibold text-gray-900">
-              <span>Total:</span>
-              <span className="text-primary-600">₱{totalPrice}</span>
+
+          <div className="border-t border-primary-200 pt-6 mb-8">
+            <div className="flex items-center justify-between text-2xl font-playfair font-bold text-primary-900">
+              <span>Total Balance</span>
+              <span className="text-accent-600">₱{totalPrice}</span>
             </div>
           </div>
 
           <button
             onClick={handlePlaceOrder}
             disabled={creating || uploadingReceipt}
-            className={`w-full py-3 sm:py-4 rounded-xl font-semibold text-base sm:text-lg transition-all duration-200 transform ${creating || uploadingReceipt ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-primary-600 text-white hover:bg-primary-700 hover:scale-[1.02]'}`}
+            className={`w-full py-4 rounded-sm font-bold tracking-[0.2em] uppercase text-sm transition-all duration-300 transform shadow-2xl active:scale-95 ${creating || uploadingReceipt ? 'bg-primary-50 text-primary-200 cursor-not-allowed' : 'bg-primary-900 text-accent-400 hover:bg-primary-850'}`}
           >
             {uploadingReceipt ? (
               <span className="flex items-center justify-center space-x-2">
                 <Loader2 className="h-5 w-5 animate-spin" />
-                <span>Uploading Receipt...</span>
+                <span>Uploading...</span>
               </span>
             ) : creating ? (
-              'Placing Order...'
+              'Confirming...'
             ) : (
-              'Place Order via Messenger'
+              'Confirm Order'
             )}
           </button>
           {error && !uiNotice && (
             <p className="text-sm text-red-600 text-center mt-2">{error}</p>
           )}
-          
+
           <p className="text-xs text-gray-500 text-center mt-3">
             You'll be redirected to Facebook Messenger to confirm your order. Don't forget to attach your payment screenshot!
           </p>

@@ -52,7 +52,7 @@ const SiteSettingsManager: React.FC = () => {
   const handleSave = async () => {
     try {
       let logoUrl = logoPreview;
-      
+
       // Upload new logo if selected
       if (logoFile) {
         const uploadedUrl = await uploadImage(logoFile, 'site-logo');
@@ -108,15 +108,15 @@ const SiteSettingsManager: React.FC = () => {
     <div className="space-y-6">
       {/* Site Settings Section */}
       <div className="bg-white rounded-xl shadow-sm p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-noto font-semibold text-black">Site Settings</h2>
+        <div className="flex items-center justify-between mb-6 border-b border-primary-50 pb-4">
+          <h2 className="text-2xl font-playfair font-bold text-primary-900">Brand Settings</h2>
           {!isEditing ? (
             <button
               onClick={() => setIsEditing(true)}
-              className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors duration-200 flex items-center space-x-2"
+              className="bg-primary-900 text-accent-400 px-6 py-2 rounded-sm hover:bg-primary-850 transition-all duration-300 flex items-center space-x-2 font-bold tracking-widest uppercase text-xs shadow-md"
             >
               <Save className="h-4 w-4" />
-              <span>Edit Settings</span>
+              <span>Update Settings</span>
             </button>
           ) : (
             <div className="flex space-x-2">
@@ -140,119 +140,119 @@ const SiteSettingsManager: React.FC = () => {
         </div>
 
         <div className="space-y-6">
-        {/* Site Logo */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Site Logo
-          </label>
-          <div className="flex items-center space-x-4">
-            <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
-              {logoPreview ? (
-                <img
-                  src={logoPreview}
-                  alt="Site Logo"
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="text-2xl text-gray-400">☕</div>
+          {/* Site Logo */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Site Logo
+            </label>
+            <div className="flex items-center space-x-4">
+              <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
+                {logoPreview ? (
+                  <img
+                    src={logoPreview}
+                    alt="Site Logo"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="text-2xl text-primary-200">🍱</div>
+                )}
+              </div>
+              {isEditing && (
+                <div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleLogoChange}
+                    className="hidden"
+                    id="logo-upload"
+                  />
+                  <label
+                    htmlFor="logo-upload"
+                    className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors duration-200 flex items-center space-x-2 cursor-pointer"
+                  >
+                    <Upload className="h-4 w-4" />
+                    <span>Upload Logo</span>
+                  </label>
+                </div>
               )}
             </div>
-            {isEditing && (
-              <div>
+          </div>
+
+          {/* Site Name */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Site Name
+            </label>
+            {isEditing ? (
+              <input
+                type="text"
+                name="site_name"
+                value={formData.site_name}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                placeholder="Enter site name"
+              />
+            ) : (
+              <p className="text-lg font-medium text-black">{siteSettings?.site_name}</p>
+            )}
+          </div>
+
+          {/* Site Description */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Site Description
+            </label>
+            {isEditing ? (
+              <textarea
+                name="site_description"
+                value={formData.site_description}
+                onChange={handleInputChange}
+                rows={3}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                placeholder="Enter site description"
+              />
+            ) : (
+              <p className="text-gray-600">{siteSettings?.site_description}</p>
+            )}
+          </div>
+
+          {/* Currency Settings */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Currency Symbol
+              </label>
+              {isEditing ? (
                 <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleLogoChange}
-                  className="hidden"
-                  id="logo-upload"
+                  type="text"
+                  name="currency"
+                  value={formData.currency}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                  placeholder="e.g., ₱, $, €"
                 />
-                <label
-                  htmlFor="logo-upload"
-                  className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors duration-200 flex items-center space-x-2 cursor-pointer"
-                >
-                  <Upload className="h-4 w-4" />
-                  <span>Upload Logo</span>
-                </label>
-              </div>
-            )}
+              ) : (
+                <p className="text-lg font-medium text-black">{siteSettings?.currency}</p>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Currency Code
+              </label>
+              {isEditing ? (
+                <input
+                  type="text"
+                  name="currency_code"
+                  value={formData.currency_code}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                  placeholder="e.g., PHP, USD, EUR"
+                />
+              ) : (
+                <p className="text-lg font-medium text-black">{siteSettings?.currency_code}</p>
+              )}
+            </div>
           </div>
-        </div>
-
-        {/* Site Name */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Site Name
-          </label>
-          {isEditing ? (
-            <input
-              type="text"
-              name="site_name"
-              value={formData.site_name}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-              placeholder="Enter site name"
-            />
-          ) : (
-            <p className="text-lg font-medium text-black">{siteSettings?.site_name}</p>
-          )}
-        </div>
-
-        {/* Site Description */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Site Description
-          </label>
-          {isEditing ? (
-            <textarea
-              name="site_description"
-              value={formData.site_description}
-              onChange={handleInputChange}
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-              placeholder="Enter site description"
-            />
-          ) : (
-            <p className="text-gray-600">{siteSettings?.site_description}</p>
-          )}
-        </div>
-
-        {/* Currency Settings */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Currency Symbol
-            </label>
-            {isEditing ? (
-              <input
-                type="text"
-                name="currency"
-                value={formData.currency}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                placeholder="e.g., ₱, $, €"
-              />
-            ) : (
-              <p className="text-lg font-medium text-black">{siteSettings?.currency}</p>
-            )}
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Currency Code
-            </label>
-            {isEditing ? (
-              <input
-                type="text"
-                name="currency_code"
-                value={formData.currency_code}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                placeholder="e.g., PHP, USD, EUR"
-              />
-            ) : (
-              <p className="text-lg font-medium text-black">{siteSettings?.currency_code}</p>
-            )}
-          </div>
-        </div>
         </div>
       </div>
 

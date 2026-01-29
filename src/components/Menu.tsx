@@ -31,7 +31,7 @@ const Menu: React.FC<MenuProps> = ({ menuItems, addToCart, cartItems, updateQuan
       // Preload images for visible category first
       const visibleItems = menuItems.filter(item => item.category === activeCategory);
       preloadImages(visibleItems);
-      
+
       // Then preload other images after a short delay
       setTimeout(() => {
         const otherItems = menuItems.filter(item => item.category !== activeCategory);
@@ -48,7 +48,7 @@ const Menu: React.FC<MenuProps> = ({ menuItems, addToCart, cartItems, updateQuan
       const mobileNavHeight = 60; // Mobile nav height
       const offset = headerHeight + mobileNavHeight + 20; // Extra padding
       const elementPosition = element.offsetTop - offset;
-      
+
       window.scrollTo({
         top: elementPosition,
         behavior: 'smooth'
@@ -87,51 +87,51 @@ const Menu: React.FC<MenuProps> = ({ menuItems, addToCart, cartItems, updateQuan
 
   return (
     <>
-      <MobileNav 
+      <MobileNav
         activeCategory={activeCategory}
         onCategoryClick={handleCategoryClick}
       />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-      <div className="text-center mb-16">
-        <h2 className="text-5xl font-funnel font-semibold text-gray-900 mb-4">Our Menu</h2>
-        <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
-        </p>
-      </div>
+        <div className="text-center mb-16">
+          <h2 className="text-5xl font-playfair font-bold text-primary-900 mb-4 tracking-tight">Our Menu</h2>
+          <div className="w-24 h-1 bg-accent-500 mx-auto mt-6"></div>
+        </div>
 
-      {categories.map((category) => {
-        const categoryItems = menuItems.filter(item => item.category === category.id);
-        
-        if (categoryItems.length === 0) return null;
-        
-        return (
-          <section key={category.id} id={category.id} className="mb-20">
-            <div className="flex items-center mb-10 pb-4 border-b-2 border-primary-200">
-              <span className="text-4xl mr-4">{category.icon}</span>
-              <h3 className="text-4xl font-funnel font-semibold text-gray-900">{category.name}</h3>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {categoryItems.map((item) => {
-                const cartItem = cartItems.find(cartItem =>
-                  cartItem.menuItemId === item.id &&
-                  !cartItem.selectedVariation &&
-                  (!cartItem.selectedAddOns || cartItem.selectedAddOns.length === 0)
-                );
-                return (
-                  <MenuItemCard
-                    key={item.id}
-                    item={item}
-                    onAddToCart={addToCart}
-                    quantity={cartItem?.quantity || 0}
-                    cartItemId={cartItem?.id}
-                    onUpdateQuantity={updateQuantity}
-                  />
-                );
-              })}
-            </div>
-          </section>
-        );
-      })}
+        {categories.map((category) => {
+          const categoryItems = menuItems.filter(item => item.category === category.id);
+
+          if (categoryItems.length === 0) return null;
+
+          return (
+            <section key={category.id} id={category.id} className="mb-20">
+              <div className="flex items-center mb-10 pb-6 border-b border-primary-100 relative">
+                <span className="text-3xl mr-4 grayscale opacity-40">{category.icon}</span>
+                <h3 className="text-3xl font-playfair font-bold text-primary-900 tracking-wide uppercase">{category.name}</h3>
+                <div className="absolute bottom-0 left-0 w-16 h-0.5 bg-accent-500"></div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {categoryItems.map((item) => {
+                  const cartItem = cartItems.find(cartItem =>
+                    cartItem.menuItemId === item.id &&
+                    !cartItem.selectedVariation &&
+                    (!cartItem.selectedAddOns || cartItem.selectedAddOns.length === 0)
+                  );
+                  return (
+                    <MenuItemCard
+                      key={item.id}
+                      item={item}
+                      onAddToCart={addToCart}
+                      quantity={cartItem?.quantity || 0}
+                      cartItemId={cartItem?.id}
+                      onUpdateQuantity={updateQuantity}
+                    />
+                  );
+                })}
+              </div>
+            </section>
+          );
+        })}
       </main>
     </>
   );

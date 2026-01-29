@@ -127,10 +127,10 @@ const AdminDashboard: React.FC = () => {
       const item = menuItems.find(i => i.id === id);
       return item ? item.name : 'Unknown Item';
     }).slice(0, 5); // Show first 5 items
-    
+
     const displayNames = itemNames.join(', ');
     const moreItems = selectedItems.length > 5 ? ` and ${selectedItems.length - 5} more items` : '';
-    
+
     if (confirm(`Are you sure you want to delete ${selectedItems.length} item(s)?\n\nItems to delete: ${displayNames}${moreItems}\n\nThis action cannot be undone.`)) {
       try {
         setIsProcessing(true);
@@ -177,8 +177,8 @@ const AdminDashboard: React.FC = () => {
   };
 
   const handleSelectItem = (itemId: string) => {
-    setSelectedItems(prev => 
-      prev.includes(itemId) 
+    setSelectedItems(prev =>
+      prev.includes(itemId)
         ? prev.filter(id => id !== itemId)
         : [...prev, itemId]
     );
@@ -286,8 +286,8 @@ const AdminDashboard: React.FC = () => {
                   <ArrowLeft className="h-5 w-5" />
                   <span>Back</span>
                 </button>
-                <h1 className="text-2xl font-playfair font-semibold text-black">
-                  {currentView === 'add' ? 'Add New Item' : 'Edit Item'}
+                <h1 className="text-3xl font-playfair font-bold text-primary-900 tracking-tight">
+                  {currentView === 'add' ? 'New Menu Item' : 'Modify Item'}
                 </h1>
               </div>
               <div className="flex space-x-3">
@@ -300,10 +300,10 @@ const AdminDashboard: React.FC = () => {
                 </button>
                 <button
                   onClick={handleSaveItem}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 flex items-center space-x-2"
+                  className="px-6 py-2 bg-primary-900 text-accent-400 rounded-sm hover:bg-primary-850 transition-all duration-300 flex items-center space-x-2 font-bold tracking-widest uppercase text-xs shadow-md"
                 >
                   <Save className="h-4 w-4" />
-                  <span>Save</span>
+                  <span>Commit Changes</span>
                 </button>
               </div>
             </div>
@@ -641,7 +641,7 @@ const AdminDashboard: React.FC = () => {
                   <h3 className="text-lg font-medium text-black mb-1">Bulk Actions</h3>
                   <p className="text-sm text-gray-600">{selectedItems.length} item(s) selected</p>
                 </div>
-                
+
                 <div className="flex flex-col sm:flex-row gap-3">
                   {/* Change Category */}
                   <div className="flex items-center space-x-2">
@@ -662,7 +662,7 @@ const AdminDashboard: React.FC = () => {
                       ))}
                     </select>
                   </div>
-                  
+
                   {/* Remove Items */}
                   <button
                     onClick={handleBulkRemove}
@@ -672,7 +672,7 @@ const AdminDashboard: React.FC = () => {
                     <Trash2 className="h-4 w-4" />
                     <span>{isProcessing ? 'Removing...' : 'Remove Selected'}</span>
                   </button>
-                  
+
                   {/* Clear Selection */}
                   <button
                     onClick={() => {
@@ -786,11 +786,10 @@ const AdminDashboard: React.FC = () => {
                               Popular
                             </span>
                           )}
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            item.available 
-                              ? 'bg-green-100 text-green-800' 
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${item.available
+                              ? 'bg-green-100 text-green-800'
                               : 'bg-red-100 text-red-800'
-                          }`}>
+                            }`}>
                             {item.available ? 'Available' : 'Unavailable'}
                           </span>
                         </div>
@@ -850,14 +849,14 @@ const AdminDashboard: React.FC = () => {
                       </button>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1 min-w-0">
                       <h3 className="font-medium text-gray-900 truncate">{item.name}</h3>
                       <p className="text-sm text-gray-500 mt-1 line-clamp-2">{item.description}</p>
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <span className="text-gray-500">Category:</span>
@@ -887,7 +886,7 @@ const AdminDashboard: React.FC = () => {
                       <span className="ml-1 text-gray-900">{item.addOns?.length || 0}</span>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center justify-between mt-3">
                     <div className="flex items-center space-x-2">
                       {item.popular && (
@@ -895,11 +894,10 @@ const AdminDashboard: React.FC = () => {
                           Popular
                         </span>
                       )}
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        item.available 
-                          ? 'bg-green-100 text-green-800' 
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${item.available
+                          ? 'bg-green-100 text-green-800'
                           : 'bg-red-100 text-red-800'
-                      }`}>
+                        }`}>
                         {item.available ? 'Available' : 'Unavailable'}
                       </span>
                     </div>
@@ -979,8 +977,10 @@ const AdminDashboard: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
-              <Coffee className="h-8 w-8 text-black" />
-              <h1 className="text-2xl font-noto font-semibold text-black">Joe's Cafe & Resto Admin</h1>
+              <div className="p-2 bg-primary-900 rounded-full border border-accent-500/30">
+                <Coffee className="h-6 w-6 text-accent-400" />
+              </div>
+              <h1 className="text-2xl font-playfair font-bold text-primary-900 tracking-wide uppercase">Yoshihara Dashboard</h1>
             </div>
             <div className="flex items-center space-x-4">
               <a
@@ -997,7 +997,7 @@ const AdminDashboard: React.FC = () => {
                 className="flex items-center space-x-2 text-gray-600 hover:text-red-600 transition-colors duration-200"
               >
                 <LogOut className="h-4 w-4" />
-                <span>Logout</span>
+                <span>Sign Out</span>
               </button>
             </div>
           </div>
@@ -1009,12 +1009,12 @@ const AdminDashboard: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-white rounded-xl shadow-sm p-6">
             <div className="flex items-center">
-              <div className="p-2 bg-green-600 rounded-lg">
-                <Package className="h-6 w-6 text-white" />
+              <div className="p-3 bg-primary-900 rounded-sm border border-accent-500/20">
+                <Package className="h-6 w-6 text-accent-400" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Items</p>
-                <p className="text-2xl font-semibold text-gray-900">{totalItems}</p>
+                <p className="text-[10px] font-bold text-primary-400 tracking-widest uppercase">Catalogue Size</p>
+                <p className="text-3xl font-playfair font-bold text-primary-900">{totalItems}</p>
               </div>
             </div>
           </div>

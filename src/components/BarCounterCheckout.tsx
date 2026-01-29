@@ -24,13 +24,13 @@ const OrderCompletedModal: React.FC<OrderCompletedModalProps> = ({ onClose }) =>
               <CheckCircle className="h-12 w-12 text-green-600" />
             </div>
           </div>
-          <h2 className="text-2xl font-semibold text-gray-900 mb-2">Order Completed</h2>
-          <p className="text-gray-600 mb-6">Your order has been successfully placed.</p>
+          <h2 className="text-3xl font-playfair font-bold text-primary-900 mb-4 tracking-tight">Order Accepted</h2>
+          <p className="text-primary-500 mb-8 font-light italic">Your dining experience is being prepared.</p>
           <button
             onClick={onClose}
-            className="w-full bg-primary-600 text-white py-3 rounded-xl hover:bg-primary-700 transition-all duration-200 font-semibold"
+            className="w-full bg-primary-900 text-accent-400 py-4 rounded-sm hover:bg-primary-850 transition-all duration-300 font-bold tracking-widest uppercase text-xs shadow-xl active:scale-95"
           >
-            OK
+            Confirmed
           </button>
         </div>
       </div>
@@ -38,11 +38,11 @@ const OrderCompletedModal: React.FC<OrderCompletedModalProps> = ({ onClose }) =>
   );
 };
 
-const BarCounterCheckout: React.FC<BarCounterCheckoutProps> = ({ 
-  cartItems, 
-  totalPrice, 
+const BarCounterCheckout: React.FC<BarCounterCheckoutProps> = ({
+  cartItems,
+  totalPrice,
   onBack,
-  onOrderComplete 
+  onOrderComplete
 }) => {
   const { createOrder, creating, error } = useOrders();
   const [customerName, setCustomerName] = useState('');
@@ -73,7 +73,7 @@ const BarCounterCheckout: React.FC<BarCounterCheckoutProps> = ({
     try {
       // Create order with counter service type
       // Use table number as contact number (required field) and in notes
-      const orderNotes = notes.trim() 
+      const orderNotes = notes.trim()
         ? `Table: ${tableNumber} | ${notes}`
         : `Table: ${tableNumber}`;
 
@@ -116,12 +116,12 @@ const BarCounterCheckout: React.FC<BarCounterCheckoutProps> = ({
           <div className="flex items-center mb-8">
             <button
               onClick={onBack}
-              className="flex items-center space-x-2 text-gray-600 hover:text-black transition-colors duration-200 mr-4"
+              className="flex items-center space-x-2 text-primary-600 hover:text-primary-900 transition-colors duration-200 mr-4 group"
             >
-              <ArrowLeft className="h-5 w-5" />
-              <span>Back to Cart</span>
+              <ArrowLeft className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
+              <span className="font-semibold tracking-widest uppercase text-[10px]">Back to Selections</span>
             </button>
-            <h1 className="text-3xl font-playfair font-semibold text-black">Place Order</h1>
+            <h1 className="text-3xl font-playfair font-bold text-primary-900 ml-4">Confirm Order</h1>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -129,7 +129,7 @@ const BarCounterCheckout: React.FC<BarCounterCheckoutProps> = ({
             <div className="lg:col-span-2">
               <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
                 <h2 className="text-xl font-semibold text-gray-900 mb-6">Customer Information</h2>
-                
+
                 {uiNotice && (
                   <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
                     <p className="text-red-700 text-sm">{uiNotice}</p>
@@ -163,8 +163,8 @@ const BarCounterCheckout: React.FC<BarCounterCheckoutProps> = ({
                       id="tableNumber"
                       value={tableNumber}
                       onChange={(e) => setTableNumber(e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      placeholder="Enter table number"
+                      className="w-full px-4 py-3 border border-primary-100 rounded-sm focus:ring-1 focus:ring-accent-500 focus:border-accent-500 outline-none transition-all placeholder:text-primary-100"
+                      placeholder="Table ID"
                       required
                     />
                   </div>
@@ -205,7 +205,7 @@ const BarCounterCheckout: React.FC<BarCounterCheckoutProps> = ({
             <div className="lg:col-span-1">
               <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200 sticky top-8">
                 <h2 className="text-xl font-semibold text-gray-900 mb-6">Order Summary</h2>
-                
+
                 <div className="space-y-4 mb-6">
                   {cartItems.map((item) => (
                     <div key={item.id} className="flex justify-between items-start">
@@ -238,9 +238,9 @@ const BarCounterCheckout: React.FC<BarCounterCheckoutProps> = ({
                 <button
                   onClick={handlePlaceOrder}
                   disabled={creating || cartItems.length === 0}
-                  className="w-full bg-primary-600 text-white py-4 rounded-xl hover:bg-primary-700 transition-all duration-200 font-semibold disabled:bg-gray-300 disabled:cursor-not-allowed mt-6"
+                  className="w-full bg-primary-900 text-accent-400 py-5 rounded-sm hover:bg-primary-850 transition-all duration-300 font-bold tracking-[0.2em] uppercase text-sm shadow-2xl active:scale-[0.98] disabled:bg-primary-50 disabled:text-primary-200 mt-6"
                 >
-                  {creating ? 'Placing Order...' : 'Place Order'}
+                  {creating ? 'Accepting...' : 'Place Order'}
                 </button>
               </div>
             </div>
