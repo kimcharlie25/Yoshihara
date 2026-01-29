@@ -18,7 +18,7 @@ const Header: React.FC<HeaderProps> = ({ cartItemsCount, onCartClick, onMenuClic
         <div className="flex items-center justify-between h-20">
           <button
             onClick={onMenuClick}
-            className="flex items-center space-x-3 text-white hover:text-accent-400 transition-colors duration-200"
+            className="flex items-center space-x-2 text-white hover:text-accent-400 transition-colors duration-200"
           >
             {loading ? (
               <div className="w-12 h-12 bg-primary-800 rounded-full animate-pulse" />
@@ -26,13 +26,13 @@ const Header: React.FC<HeaderProps> = ({ cartItemsCount, onCartClick, onMenuClic
               <img
                 src={siteSettings?.site_logo || "/logo.jpg"}
                 alt={siteSettings?.site_name || "Yoshihara"}
-                className="w-12 h-12 rounded-full object-cover ring-2 ring-accent-500/30"
+                className="w-16 h-16 rounded-full object-cover"
                 onError={(e) => {
                   e.currentTarget.src = "/logo.jpg";
                 }}
               />
             )}
-            <div className="flex flex-col">
+            <div className="flex flex-col items-start">
               <h1 className="text-sm sm:text-lg md:text-2xl font-playfair font-bold text-white tracking-widest uppercase leading-tight">
                 {loading ? (
                   <div className="w-32 h-6 bg-primary-800 rounded animate-pulse" />
