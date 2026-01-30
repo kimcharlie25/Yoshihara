@@ -18,7 +18,7 @@ const Header: React.FC<HeaderProps> = ({ cartItemsCount, onCartClick, onMenuClic
         <div className="flex items-center justify-between h-20">
           <button
             onClick={onMenuClick}
-            className="flex items-center space-x-2 text-white hover:text-accent-400 transition-colors duration-200"
+            className="flex items-center text-white hover:text-accent-400 transition-colors duration-200"
           >
             {loading ? (
               <div className="w-12 h-12 bg-primary-800 rounded-full animate-pulse" />
