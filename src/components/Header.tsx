@@ -40,7 +40,7 @@ const Header: React.FC<HeaderProps> = ({ cartItemsCount, onCartClick, onMenuClic
                   siteSettings?.site_name || "Yoshihara"
                 )}
               </h1>
-              <span className="text-[8px] sm:text-[10px] text-accent-400 font-bold tracking-[0.2em] uppercase">Japanese Dining & Grocery</span>
+              <span className="text-[8px] sm:text-[10px] text-white tracking-[0.2em] uppercase">Japanese Dining & Grocery</span>
             </div>
           </button>
 
