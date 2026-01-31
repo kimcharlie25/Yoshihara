@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Plus, Edit, Trash2, Save, X, ArrowLeft, Coffee, TrendingUp, Package, Users, FolderOpen, CreditCard, Settings, ShoppingCart, LogOut, Boxes } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { Plus, Edit, Trash2, Save, X, ArrowLeft, Coffee, TrendingUp, Package, Users, FolderOpen, CreditCard, Settings, ShoppingCart, LogOut, Boxes, ChevronDown } from 'lucide-react';
 import { MenuItem, Variation, AddOn } from '../types';
 import { addOnCategories } from '../data/menuData';
 import { useMenu } from '../hooks/useMenu';
@@ -22,6 +22,13 @@ const AdminDashboard: React.FC = () => {
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showBulkActions, setShowBulkActions] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
+
+  const filteredMenuItems = useMemo(() => {
+    if (categoryFilter === 'all') return menuItems;
+    return menuItems.filter(item => item.category === categoryFilter);
+  }, [menuItems, categoryFilter]);
+
   const [formData, setFormData] = useState<Partial<MenuItem>>({
     name: '',
     description: '',
@@ -185,11 +192,11 @@ const AdminDashboard: React.FC = () => {
   };
 
   const handleSelectAll = () => {
-    if (selectedItems.length === menuItems.length) {
+    if (selectedItems.length === filteredMenuItems.length) {
       setSelectedItems([]);
       setShowBulkActions(false);
     } else {
-      setSelectedItems(menuItems.map(item => item.id));
+      setSelectedItems(filteredMenuItems.map(item => item.id));
       setShowBulkActions(true);
     }
   };
@@ -620,6 +627,23 @@ const AdminDashboard: React.FC = () => {
                     </button>
                   </div>
                 )}
+                <div className="relative">
+                  <select
+                    value={categoryFilter}
+                    onChange={(e) => setCategoryFilter(e.target.value)}
+                    className="appearance-none bg-white border border-gray-300 text-gray-700 py-2 px-4 pr-8 rounded-lg leading-tight focus:outline-none focus:bg-white focus:border-gray-500 hover:border-gray-400 transition-colors cursor-pointer"
+                  >
+                    <option value="all">All Categories</option>
+                    {categories.map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                    <ChevronDown className="h-4 w-4" />
+                  </div>
+                </div>
                 <button
                   onClick={handleAddItem}
                   className="flex items-center space-x-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors duration-200"
@@ -698,12 +722,12 @@ const AdminDashboard: React.FC = () => {
                     <label className="flex items-center space-x-2">
                       <input
                         type="checkbox"
-                        checked={selectedItems.length === menuItems.length && menuItems.length > 0}
+                        checked={selectedItems.length === filteredMenuItems.length && filteredMenuItems.length > 0}
                         onChange={handleSelectAll}
                         className="rounded border-gray-300 text-green-600 focus:ring-green-500"
                       />
                       <span className="text-sm font-medium text-gray-700">
-                        Select All ({menuItems.length} items)
+                        Select All ({filteredMenuItems.length} items)
                       </span>
                     </label>
                   </div>
@@ -742,7 +766,7 @@ const AdminDashboard: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {menuItems.map((item) => (
+                  {filteredMenuItems.map((item) => (
                     <tr key={item.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4">
                         <input
@@ -787,8 +811,8 @@ const AdminDashboard: React.FC = () => {
                             </span>
                           )}
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${item.available
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-red-100 text-red-800'
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-red-100 text-red-800'
                             }`}>
                             {item.available ? 'Available' : 'Unavailable'}
                           </span>
@@ -895,8 +919,8 @@ const AdminDashboard: React.FC = () => {
                         </span>
                       )}
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${item.available
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-red-100 text-red-800'
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-red-100 text-red-800'
                         }`}>
                         {item.available ? 'Available' : 'Unavailable'}
                       </span>
